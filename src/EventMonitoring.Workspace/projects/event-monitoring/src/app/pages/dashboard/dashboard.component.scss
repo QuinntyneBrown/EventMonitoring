@@ -1,0 +1,49 @@
+.dashboard {
+  padding: var(--em-spacing-lg, 24px);
+
+  &__header {
+    margin-bottom: var(--em-spacing-lg, 24px);
+  }
+
+  &__title {
+    font-size: 24px;
+    font-weight: 400;
+    color: var(--em-color-text-high, rgba(255, 255, 255, 0.87));
+    margin: 0;
+  }
+
+  &__subtitle {
+    font-size: 14px;
+    color: var(--em-color-text-medium, rgba(255, 255, 255, 0.6));
+    margin: var(--em-spacing-xs, 4px) 0 0;
+  }
+
+  &__content {
+    min-height: 400px;
+  }
+
+  &__placeholder {
+    background-color: var(--em-color-surface, #1f1f1f);
+    border-radius: var(--em-radius-md, 8px);
+    padding: 48px;
+    text-align: center;
+    border: 1px dashed rgba(255, 255, 255, 0.2);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+  }
+
+  &__placeholder-icon {
+    font-family: 'Material Icons';
+    font-size: 64px;
+    color: rgba(255, 255, 255, 0.3);
+    margin-bottom: var(--em-spacing-md, 16px);
+  }
+
+  &__placeholder-text {
+    font-size: 16px;
+    color: rgba(255, 255, 255, 0.5);
+    margin: 0;
+  }
+}
