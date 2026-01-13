@@ -44,6 +44,30 @@ To execute unit tests with the [Vitest](https://vitest.dev/) test runner, use th
 ng test
 ```
 
+## Storybook
+
+This project includes [Storybook](https://storybook.js.org/) for component development and documentation. Storybook allows you to develop and test components in isolation.
+
+### Running Storybook
+
+To start the Storybook development server, run:
+
+```bash
+npm run storybook
+```
+
+The Storybook interface will be available at `http://localhost:6006/`.
+
+### Building Storybook
+
+To build a static version of Storybook for deployment, run:
+
+```bash
+npm run build-storybook
+```
+
+The built Storybook will be output to the `dist/storybook/` directory.
+
 ## Running end-to-end tests
 
 For end-to-end (e2e) testing, run:
