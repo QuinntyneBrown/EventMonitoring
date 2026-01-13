@@ -37,15 +37,17 @@ public static class ServiceCollectionExtensions
         // Register message broker services
         services.AddSingleton<IMessageTypeRegistry, MessageTypeRegistry>();
         services.AddSingleton<IMessageSerializer, MessagePackSerializer>();
+        services.AddSingleton<IMessageContextAccessor, MessageContextAccessor>();
         services.AddSingleton<IMessagePublisher>(sp =>
         {
             var redis = sp.GetRequiredService<IConnectionMultiplexer>();
             var serializer = sp.GetRequiredService<IMessageSerializer>();
             var typeRegistry = sp.GetRequiredService<IMessageTypeRegistry>();
+            var contextAccessor = sp.GetRequiredService<IMessageContextAccessor>();
             var logger = sp.GetRequiredService<Microsoft.Extensions.Logging.ILogger<RedisMessagePublisher>>();
             var opts = sp.GetRequiredService<IOptions<MessageBrokerOptions>>().Value;
             
-            return new RedisMessagePublisher(redis, serializer, typeRegistry, logger, opts.ServiceName);
+            return new RedisMessagePublisher(redis, serializer, typeRegistry, contextAccessor, logger, opts.ServiceName);
         });
 
         return services;

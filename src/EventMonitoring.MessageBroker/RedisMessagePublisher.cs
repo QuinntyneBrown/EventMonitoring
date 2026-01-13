@@ -14,6 +14,7 @@ public sealed class RedisMessagePublisher : IMessagePublisher
     private readonly IConnectionMultiplexer _redis;
     private readonly IMessageSerializer _serializer;
     private readonly IMessageTypeRegistry _typeRegistry;
+    private readonly IMessageContextAccessor _contextAccessor;
     private readonly ILogger<RedisMessagePublisher> _logger;
     private readonly string _sourceService;
 
@@ -21,12 +22,14 @@ public sealed class RedisMessagePublisher : IMessagePublisher
         IConnectionMultiplexer redis,
         IMessageSerializer serializer,
         IMessageTypeRegistry typeRegistry,
+        IMessageContextAccessor contextAccessor,
         ILogger<RedisMessagePublisher> logger,
         string sourceService)
     {
         _redis = redis ?? throw new ArgumentNullException(nameof(redis));
         _serializer = serializer ?? throw new ArgumentNullException(nameof(serializer));
         _typeRegistry = typeRegistry ?? throw new ArgumentNullException(nameof(typeRegistry));
+        _contextAccessor = contextAccessor ?? throw new ArgumentNullException(nameof(contextAccessor));
         _logger = logger ?? throw new ArgumentNullException(nameof(logger));
         _sourceService = sourceService ?? throw new ArgumentNullException(nameof(sourceService));
     }
@@ -47,6 +50,11 @@ public sealed class RedisMessagePublisher : IMessagePublisher
             throw new InvalidOperationException($"Message type {typeof(T).Name} is not registered.");
         }
 
+        // Get current context for causation tracking
+        var currentContext = _contextAccessor.Current;
+        var correlationId = currentContext?.Header.CorrelationId ?? Guid.NewGuid().ToString();
+        var causationId = currentContext?.Header.MessageId;
+
         // Create message envelope with header
         var envelope = new MessageEnvelope<T>
         {
@@ -54,7 +62,8 @@ public sealed class RedisMessagePublisher : IMessagePublisher
             {
                 MessageType = messageType,
                 MessageId = Guid.NewGuid().ToString(),
-                CorrelationId = Guid.NewGuid().ToString(), // TODO: Get from context if available
+                CorrelationId = correlationId,
+                CausationId = causationId,
                 TimestampUnixMs = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds(),
                 SourceService = _sourceService,
                 SchemaVersion = 1

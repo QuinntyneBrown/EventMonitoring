@@ -16,7 +16,6 @@ public static class ConfigureServices
             .WithOrigins(corsOrigin)
             .AllowAnyMethod()
             .AllowAnyHeader()
-            .SetIsOriginAllowed(isOriginAllowed: _ => true)
             .AllowCredentials()));
         services.AddControllers();
         services.AddEndpointsApiExplorer();
