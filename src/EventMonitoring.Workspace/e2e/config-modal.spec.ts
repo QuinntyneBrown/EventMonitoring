@@ -14,11 +14,15 @@ test.describe('Configuration File Modal', () => {
     
     // Add telemetry state tile - use data attribute for precise targeting
     await page.locator('button[data-tile-type="telemetry-state"]').click();
-    await page.waitForTimeout(500);
+    
+    // Wait for tile to be added
+    await expect(page.locator('em-telemetry-state-tile')).toBeVisible();
     
     // Add a graph tile - use data attribute for precise targeting
     await page.locator('button[data-tile-type="graph"]').click();
-    await page.waitForTimeout(500);
+    
+    // Wait for graph tile to be added and folder_open icon to be available
+    await expect(page.locator('span.material-icons').filter({ hasText: 'folder_open' })).toBeVisible();
   });
 
   test('should open configuration modal when tile config button is clicked', async ({ page }) => {
