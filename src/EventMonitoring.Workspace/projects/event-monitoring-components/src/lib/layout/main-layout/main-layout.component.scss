@@ -9,6 +9,19 @@
       margin-left: 0;
     }
   }
+
+  &__edit-sidenav {
+    width: 280px;
+    background-color: var(--em-color-surface, #1f1f1f);
+    position: fixed;
+    top: 64px;
+    left: 0;
+    bottom: 0;
+    padding-top: var(--em-spacing-sm, 8px);
+    border-right: 1px solid #333;
+    overflow-y: auto;
+    z-index: 100;
+  }
 }
 
 :host ::ng-deep {

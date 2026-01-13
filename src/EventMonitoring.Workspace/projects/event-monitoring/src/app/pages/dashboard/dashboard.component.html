@@ -8,6 +8,15 @@
   (headerActionClick)="onHeaderActionClick($event)"
   (navItemClick)="onNavItemClick($event)"
 >
+  <!-- Tile palette in edit mode -->
+  <div sidenav-edit-content>
+    <app-tile-palette
+      [tileTypes]="dashboardService.tileTypes"
+      [canAddTile]="canAddTile"
+      (addTile)="onAddTile($event)"
+    ></app-tile-palette>
+  </div>
+
   <div class="dashboard">
     <div class="dashboard__header">
       <h1 class="dashboard__title">Dashboard</h1>
@@ -15,11 +24,77 @@
     </div>
 
     <div class="dashboard__content">
-      <!-- Dashboard grid will be added here -->
-      <div class="dashboard__placeholder">
-        <span class="dashboard__placeholder-icon">widgets</span>
-        <p class="dashboard__placeholder-text">Dashboard tiles will be displayed here</p>
-      </div>
+      @if (tiles.length === 0) {
+        <div class="dashboard__placeholder">
+          <span class="dashboard__placeholder-icon">widgets</span>
+          <p class="dashboard__placeholder-text">
+            {{ editModeActive ? 'Add tiles from the sidebar to get started' : 'No tiles added yet. Enable edit mode to add tiles.' }}
+          </p>
+        </div>
+      } @else {
+        <em-dashboard-grid
+          [items]="tiles"
+          [editMode]="editModeActive"
+          (gridChange)="onGridChange($event)"
+          (itemRemove)="onRemoveTile($event)"
+        >
+          @for (tile of tiles; track tile.id) {
+            <div
+              class="dashboard__tile"
+              [attr.gs-id]="tile.id"
+              [attr.gs-x]="tile.x"
+              [attr.gs-y]="tile.y"
+              [attr.gs-w]="tile.w"
+              [attr.gs-h]="tile.h"
+            >
+              @switch (tile.type) {
+                @case ('telemetry-state') {
+                  <em-telemetry-state-tile
+                    [mode]="mode"
+                    [isPlaying]="isPlaying"
+                    [stats]="telemetryStats"
+                    [timeline]="timeline"
+                    [editMode]="editModeActive"
+                  ></em-telemetry-state-tile>
+                }
+                @case ('graph') {
+                  <em-graph-tile
+                    [title]="getTileTitle(tile)"
+                    [series]="getGraphSeries(tile.id)"
+                    [editMode]="editModeActive"
+                    (actionClick)="onTileActionClick(tile.id, $event)"
+                  ></em-graph-tile>
+                }
+                @case ('tabular') {
+                  <em-tabular-tile
+                    [title]="getTileTitle(tile)"
+                    [rows]="getTabularRows(tile.id)"
+                    [editMode]="editModeActive"
+                    (actionClick)="onTileActionClick(tile.id, $event)"
+                  ></em-tabular-tile>
+                }
+              }
+              @if (editModeActive) {
+                <button
+                  class="dashboard__tile-remove"
+                  (click)="onRemoveTile(tile.id)"
+                  aria-label="Remove tile"
+                >
+                  <span class="material-icons">close</span>
+                </button>
+              }
+            </div>
+          }
+        </em-dashboard-grid>
+      }
     </div>
   </div>
 </em-main-layout>
+
+<!-- Configuration Modal -->
+<em-config-file-modal
+  [isOpen]="isConfigModalOpen()"
+  [configFiles]="configFiles"
+  (closed)="onConfigModalClose()"
+  (apply)="onConfigFileApply($event)"
+></em-config-file-modal>

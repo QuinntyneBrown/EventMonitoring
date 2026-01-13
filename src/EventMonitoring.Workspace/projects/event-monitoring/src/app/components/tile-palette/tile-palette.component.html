@@ -1,0 +1,29 @@
+<div class="tile-palette">
+  <div class="tile-palette__header">
+    <span class="tile-palette__icon material-icons">widgets</span>
+    <h3 class="tile-palette__title">Add Tiles</h3>
+  </div>
+  <p class="tile-palette__description">
+    Drag tiles onto the dashboard or click to add
+  </p>
+  
+  <div class="tile-palette__items">
+    @for (tileType of tileTypes; track tileType.type) {
+      <button
+        class="tile-palette__item"
+        [class.tile-palette__item--disabled]="!canAddTile(tileType.type)"
+        [disabled]="!canAddTile(tileType.type)"
+        [attr.data-tile-type]="tileType.type"
+        (click)="onAddTile(tileType.type)"
+      >
+        <span class="tile-palette__item-icon material-icons">{{ tileType.icon }}</span>
+        <div class="tile-palette__item-content">
+          <span class="tile-palette__item-label">{{ tileType.label }}</span>
+          @if (getDisabledReason(tileType); as reason) {
+            <span class="tile-palette__item-hint">{{ reason }}</span>
+          }
+        </div>
+      </button>
+    }
+  </div>
+</div>
