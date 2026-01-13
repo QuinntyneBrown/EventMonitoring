@@ -1,5 +1,10 @@
 import { test, expect } from './fixtures';
 
+// Test configuration constants
+const MODAL_LOAD_TIMEOUT = 10000;
+const BACKDROP_CLICK_X = 10;
+const BACKDROP_CLICK_Y = 10;
+
 test.describe('Configuration File Modal', () => {
   test.beforeEach(async ({ page }) => {
     await page.goto('/');
@@ -33,15 +38,17 @@ test.describe('Configuration File Modal', () => {
     // Wait for modal to be visible
     await expect(page.locator('.cdk-overlay-container em-config-file-modal')).toBeVisible();
     
-    // Check for configuration file names within the dialog - wait a bit longer for data to load
-    await expect(page.locator('text=Spacecraft Sensors')).toBeVisible({ timeout: 10000 });
+    // Check for configuration file names within the dialog - wait for data to load
+    await expect(page.locator('text=Spacecraft Sensors')).toBeVisible({ timeout: MODAL_LOAD_TIMEOUT });
     await expect(page.locator('text=Navigation Systems')).toBeVisible();
   });
 
   test('should allow searching configuration files', async ({ page }) => {
     // Open modal
     await page.locator('span.material-icons').filter({ hasText: 'folder_open' }).first().click();
-    await page.waitForTimeout(500);
+    
+    // Wait for modal to be visible
+    await expect(page.locator('.cdk-overlay-container em-config-file-modal')).toBeVisible();
     
     // Find search input
     const searchInput = page.locator('input[type="search"]').or(page.locator('input[placeholder*="Search"]'));
@@ -58,7 +65,9 @@ test.describe('Configuration File Modal', () => {
   test('should allow selecting a configuration file', async ({ page }) => {
     // Open modal
     await page.locator('span.material-icons').filter({ hasText: 'folder_open' }).first().click();
-    await page.waitForTimeout(500);
+    
+    // Wait for modal to be visible
+    await expect(page.locator('.cdk-overlay-container em-config-file-modal')).toBeVisible();
     
     // Click on a configuration file
     const configFileItem = page.locator('text=Spacecraft Sensors').or(page.locator('[class*="config-list__item"]')).first();
@@ -87,18 +96,18 @@ test.describe('Configuration File Modal', () => {
   test('should apply configuration when apply button is clicked', async ({ page }) => {
     // Open modal
     await page.locator('span.material-icons').filter({ hasText: 'folder_open' }).first().click();
-    await page.waitForTimeout(500);
+    
+    // Wait for modal to be visible
+    await expect(page.locator('.cdk-overlay-container em-config-file-modal')).toBeVisible();
     
     // Select a configuration file
     const configFileItem = page.locator('text=Spacecraft Sensors').or(page.locator('[class*="config-list__item"]')).first();
     await configFileItem.click();
-    await page.waitForTimeout(300);
     
     // Click apply button
     const applyButton = page.locator('button').filter({ hasText: /apply|select/i });
     if (await applyButton.count() > 0) {
       await applyButton.first().click();
-      await page.waitForTimeout(500);
       
       // Verify modal is closed after applying
       await expect(page.locator('.cdk-overlay-container em-config-file-modal')).not.toBeVisible();
@@ -112,9 +121,9 @@ test.describe('Configuration File Modal', () => {
     // Wait for modal to be visible
     await expect(page.locator('.cdk-overlay-container em-config-file-modal')).toBeVisible();
     
-    // Click on the backdrop by clicking outside the dialog using position
-    // Get the dialog position and click to the left of it
-    await page.mouse.click(10, 10);
+    // Click on the backdrop by clicking outside the dialog
+    // Use top-left corner position to avoid dialog content
+    await page.mouse.click(BACKDROP_CLICK_X, BACKDROP_CLICK_Y);
     
     // Verify modal is closed
     await expect(page.locator('.cdk-overlay-container em-config-file-modal')).not.toBeVisible();
@@ -123,11 +132,12 @@ test.describe('Configuration File Modal', () => {
   test('should close modal when pressing Escape key', async ({ page }) => {
     // Open modal
     await page.locator('span.material-icons').filter({ hasText: 'folder_open' }).first().click();
-    await page.waitForTimeout(500);
+    
+    // Wait for modal to be visible
+    await expect(page.locator('.cdk-overlay-container em-config-file-modal')).toBeVisible();
     
     // Press Escape key
     await page.keyboard.press('Escape');
-    await page.waitForTimeout(300);
     
     // Verify modal is closed
     await expect(page.locator('.cdk-overlay-container em-config-file-modal')).not.toBeVisible();
