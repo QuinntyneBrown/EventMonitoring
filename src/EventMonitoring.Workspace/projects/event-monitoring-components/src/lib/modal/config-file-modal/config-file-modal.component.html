@@ -1,11 +1,12 @@
-<em-modal-overlay
-  [isOpen]="isOpen"
-  title="Select Configuration File"
-  icon="folder_open"
-  iconColor="primary"
-  size="large"
-  (closed)="onClose()"
->
+<div mat-dialog-title class="modal-header">
+  <span class="material-icons modal-header__icon">folder_open</span>
+  <h2>Select Configuration File</h2>
+  <button class="modal-header__close" (click)="onClose()">
+    <span class="material-icons">close</span>
+  </button>
+</div>
+
+<div mat-dialog-content class="modal-content">
   <em-search-bar
     placeholder="Search configuration files..."
     icon="search"
@@ -66,11 +67,11 @@
       </div>
     </div>
   }
+</div>
 
-  <div modal-footer>
-    <em-button variant="secondary" (clicked)="onClose()">Cancel</em-button>
-    <em-button variant="primary" [disabled]="!selectedFile" icon="check" (clicked)="onApply()">
-      Apply Configuration
-    </em-button>
-  </div>
-</em-modal-overlay>
+<div mat-dialog-actions class="modal-actions">
+  <em-button variant="secondary" (clicked)="onClose()">Cancel</em-button>
+  <em-button variant="primary" [disabled]="!selectedFile" icon="check" (clicked)="onApply()">
+    Apply Configuration
+  </em-button>
+</div>

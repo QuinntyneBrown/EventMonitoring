@@ -1,13 +1,11 @@
 import {
   Component,
-  Input,
-  Output,
-  EventEmitter,
+  Inject,
   ChangeDetectionStrategy,
 } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { ModalOverlayComponent } from '../modal-overlay/modal-overlay.component';
+import { MatDialogModule, MatDialogRef, MAT_DIALOG_DATA } from '@angular/material/dialog';
 import { InfoBoxComponent } from '../../ui/info-box/info-box.component';
 import { ButtonComponent } from '../../ui/button/button.component';
 
@@ -26,22 +24,24 @@ export interface HistoricalRequest {
   estimatedLoadTime: number;
 }
 
+export interface HistoricalRequestModalData {
+  activeSubscriptions?: number;
+  recordsPerSecond?: number;
+  pageSize?: number;
+}
+
 @Component({
   selector: 'em-historical-request-modal',
   standalone: true,
-  imports: [CommonModule, FormsModule, ModalOverlayComponent, InfoBoxComponent, ButtonComponent],
+  imports: [CommonModule, FormsModule, MatDialogModule, InfoBoxComponent, ButtonComponent],
   templateUrl: './historical-request-modal.component.html',
   styleUrls: ['./historical-request-modal.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class HistoricalRequestModalComponent {
-  @Input() isOpen = false;
-  @Input() activeSubscriptions = 12;
-  @Input() recordsPerSecond = 5;
-  @Input() pageSize = 100;
-
-  @Output() closed = new EventEmitter<void>();
-  @Output() loadData = new EventEmitter<HistoricalRequest>();
+  activeSubscriptions = 12;
+  recordsPerSecond = 5;
+  pageSize = 100;
 
   startDateTime = '';
   endDateTime = '';
@@ -54,7 +54,15 @@ export class HistoricalRequestModalComponent {
     { label: 'Last 24 hours', hours: 24 },
   ];
 
-  constructor() {
+  constructor(
+    public dialogRef: MatDialogRef<HistoricalRequestModalComponent>,
+    @Inject(MAT_DIALOG_DATA) public data: HistoricalRequestModalData
+  ) {
+    if (data) {
+      this.activeSubscriptions = data.activeSubscriptions ?? this.activeSubscriptions;
+      this.recordsPerSecond = data.recordsPerSecond ?? this.recordsPerSecond;
+      this.pageSize = data.pageSize ?? this.pageSize;
+    }
     this.setDefaultTimeRange();
   }
 
@@ -130,7 +138,7 @@ export class HistoricalRequestModalComponent {
   }
 
   onClose(): void {
-    this.closed.emit();
+    this.dialogRef.close();
   }
 
   onLoadData(): void {
@@ -143,8 +151,7 @@ export class HistoricalRequestModalComponent {
       estimatedPages: this.estimatedPages,
       estimatedLoadTime: this.estimatedLoadTimeSeconds,
     };
-    this.loadData.emit(request);
-    this.onClose();
+    this.dialogRef.close(request);
   }
 
   get isValid(): boolean {

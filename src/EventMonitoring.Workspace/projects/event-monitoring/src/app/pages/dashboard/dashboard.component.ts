@@ -15,6 +15,10 @@ import {
   TimelineState,
   ConfigFileModalComponent,
   ConfigFile,
+  ConfigFileModalData,
+  HistoricalRequestModalComponent,
+  HistoricalRequest,
+  HistoricalRequestModalData,
   ModalService,
   PlaybackSpeed,
 } from 'event-monitoring-components';
@@ -24,6 +28,7 @@ import { TelemetryService, TelemetryMessage } from '../../services/telemetry.ser
 import { ConfigurationService } from '../../services/configuration.service';
 import { HistoricalTelemetryService } from '../../services/historical-telemetry.service';
 import { Subject, takeUntil, interval, Observable } from 'rxjs';
+import { MatDialog } from '@angular/material/dialog';
 
 @Component({
   selector: 'app-dashboard',
@@ -36,7 +41,6 @@ import { Subject, takeUntil, interval, Observable } from 'rxjs';
     GraphTileComponent,
     TabularTileComponent,
     TilePaletteComponent,
-    ConfigFileModalComponent,
   ],
   templateUrl: './dashboard.component.html',
   styleUrls: ['./dashboard.component.scss'],
@@ -104,9 +108,14 @@ export class DashboardComponent implements OnInit, OnDestroy {
     private telemetryService: TelemetryService,
     private configurationService: ConfigurationService,
     private modalService: ModalService,
-    private historicalTelemetryService: HistoricalTelemetryService
+    private historicalTelemetryService: HistoricalTelemetryService,
+    private dialog: MatDialog
   ) {
     this.tiles$ = this.dashboardService.tiles$;
+    
+    // Register modal components with ModalService
+    this.modalService.registerComponent('config-file-modal', ConfigFileModalComponent);
+    this.modalService.registerComponent('historical-request-modal', HistoricalRequestModalComponent);
   }
 
   ngOnInit(): void {
@@ -190,12 +199,23 @@ export class DashboardComponent implements OnInit, OnDestroy {
   onTileActionClick(tileId: string, actionId: string): void {
     if (actionId === 'folder' || actionId === 'folder_open') {
       this.selectedTileForConfig = tileId;
-      this.modalService.open('config-file-modal');
+      const dialogRef = this.dialog.open(ConfigFileModalComponent, {
+        data: { configFiles: this.configFiles } as ConfigFileModalData,
+        disableClose: false,
+        panelClass: 'em-dialog',
+        width: '800px',
+      });
+
+      dialogRef.afterClosed().subscribe((result: ConfigFile | undefined) => {
+        if (result) {
+          this.onConfigFileApply(result);
+        }
+        this.selectedTileForConfig = null;
+      });
     }
   }
 
   onConfigModalClose(): void {
-    this.modalService.close('config-file-modal');
     this.selectedTileForConfig = null;
   }
 
@@ -263,7 +283,7 @@ export class DashboardComponent implements OnInit, OnDestroy {
   }
 
   isConfigModalOpen(): boolean {
-    return this.modalService.isOpen('config-file-modal');
+    return false; // No longer needed with MatDialog
   }
 
   // Historical telemetry methods
@@ -272,8 +292,26 @@ export class DashboardComponent implements OnInit, OnDestroy {
     this.mode = 'review';
     this.isPlaying = false;
 
-    // Open historical request modal if it exists
-    this.modalService.open('historical-request-modal');
+    // Open historical request modal
+    const dialogRef = this.dialog.open(HistoricalRequestModalComponent, {
+      data: {
+        activeSubscriptions: this.telemetryStats.subscriptions,
+        recordsPerSecond: 5,
+        pageSize: 100,
+      } as HistoricalRequestModalData,
+      disableClose: false,
+      panelClass: 'em-dialog',
+      width: '600px',
+    });
+
+    dialogRef.afterClosed().subscribe((request: HistoricalRequest | undefined) => {
+      if (request) {
+        this.onHistoricalDataRequest(
+          new Date(request.startDateTime),
+          new Date(request.endDateTime)
+        );
+      }
+    });
   }
 
   async onHistoricalDataRequest(startTime: Date, endTime: Date): Promise<void> {

@@ -1,11 +1,12 @@
-<em-modal-overlay
-  [isOpen]="isOpen"
-  title="Request Historical Telemetry"
-  icon="history"
-  iconColor="secondary"
-  size="medium"
-  (closed)="onClose()"
->
+<div mat-dialog-title class="modal-header">
+  <span class="material-icons modal-header__icon modal-header__icon--secondary">history</span>
+  <h2>Request Historical Telemetry</h2>
+  <button class="modal-header__close" (click)="onClose()">
+    <span class="material-icons">close</span>
+  </button>
+</div>
+
+<div mat-dialog-content class="modal-content">
   <em-info-box variant="info">
     Select a time range to retrieve historical telemetry data from the HistoricalTelemetry service.
     Data will be loaded via paginated API requests and can be replayed in review mode.
@@ -80,11 +81,11 @@
       <span class="summary__value">{{ formatEstimatedLoadTime() }}</span>
     </div>
   </div>
+</div>
 
-  <div modal-footer>
-    <em-button variant="secondary" (clicked)="onClose()">Cancel</em-button>
-    <em-button variant="primary" [disabled]="!isValid" icon="download" (clicked)="onLoadData()">
-      Load Historical Data
-    </em-button>
-  </div>
-</em-modal-overlay>
+<div mat-dialog-actions class="modal-actions">
+  <em-button variant="secondary" (clicked)="onClose()">Cancel</em-button>
+  <em-button variant="primary" [disabled]="!isValid" icon="download" (clicked)="onLoadData()">
+    Load Historical Data
+  </em-button>
+</div>

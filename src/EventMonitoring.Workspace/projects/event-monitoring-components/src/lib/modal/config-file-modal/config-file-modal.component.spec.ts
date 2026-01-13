@@ -1,10 +1,12 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { vi } from 'vitest';
-import { ConfigFileModalComponent, ConfigFile } from './config-file-modal.component';
+import { MatDialogRef, MAT_DIALOG_DATA } from '@angular/material/dialog';
+import { ConfigFileModalComponent, ConfigFile, ConfigFileModalData } from './config-file-modal.component';
 
 describe('ConfigFileModalComponent', () => {
   let component: ConfigFileModalComponent;
   let fixture: ComponentFixture<ConfigFileModalComponent>;
+  let mockDialogRef: { close: ReturnType<typeof vi.fn> };
 
   const mockConfigFiles: ConfigFile[] = [
     {
@@ -33,8 +35,16 @@ describe('ConfigFileModalComponent', () => {
   ];
 
   beforeEach(async () => {
+    mockDialogRef = {
+      close: vi.fn(),
+    };
+
     await TestBed.configureTestingModule({
       imports: [ConfigFileModalComponent],
+      providers: [
+        { provide: MatDialogRef, useValue: mockDialogRef },
+        { provide: MAT_DIALOG_DATA, useValue: { configFiles: mockConfigFiles } as ConfigFileModalData },
+      ],
     }).compileComponents();
 
     fixture = TestBed.createComponent(ConfigFileModalComponent);
@@ -47,25 +57,16 @@ describe('ConfigFileModalComponent', () => {
       expect(component).toBeTruthy();
     });
 
-    it('should render modal overlay', () => {
-      component.isOpen = true;
-      fixture.detectChanges();
-
-      const modal = fixture.nativeElement.querySelector('em-modal-overlay');
-      expect(modal).toBeTruthy();
+    it('should initialize with config files from data', () => {
+      expect(component.configFiles).toEqual(mockConfigFiles);
     });
 
     it('should render search bar', () => {
-      component.isOpen = true;
-      fixture.detectChanges();
-
       const searchBar = fixture.nativeElement.querySelector('em-search-bar');
       expect(searchBar).toBeTruthy();
     });
 
     it('should render config files list', () => {
-      component.isOpen = true;
-      component.configFiles = mockConfigFiles;
       fixture.detectChanges();
 
       const items = fixture.nativeElement.querySelectorAll('.config-list__item');
@@ -75,8 +76,6 @@ describe('ConfigFileModalComponent', () => {
 
   describe('file selection', () => {
     beforeEach(() => {
-      component.isOpen = true;
-      component.configFiles = mockConfigFiles;
       fixture.detectChanges();
     });
 
@@ -138,8 +137,6 @@ describe('ConfigFileModalComponent', () => {
 
   describe('preview panel', () => {
     beforeEach(() => {
-      component.isOpen = true;
-      component.configFiles = mockConfigFiles;
       fixture.detectChanges();
     });
 
@@ -170,16 +167,13 @@ describe('ConfigFileModalComponent', () => {
 
   describe('events', () => {
     beforeEach(() => {
-      component.configFiles = mockConfigFiles;
+      fixture.detectChanges();
     });
 
-    it('should emit closed on close', () => {
-      const closedSpy = vi.fn();
-      component.closed.subscribe(closedSpy);
-
+    it('should call dialogRef.close on close', () => {
       component.onClose();
 
-      expect(closedSpy).toHaveBeenCalled();
+      expect(mockDialogRef.close).toHaveBeenCalled();
     });
 
     it('should reset state on close', () => {
@@ -192,24 +186,20 @@ describe('ConfigFileModalComponent', () => {
       expect(component.searchQuery).toBe('');
     });
 
-    it('should emit apply with selected file', () => {
-      const applySpy = vi.fn();
-      component.apply.subscribe(applySpy);
+    it('should call dialogRef.close with selected file on apply', () => {
       component.selectedFile = mockConfigFiles[0];
 
       component.onApply();
 
-      expect(applySpy).toHaveBeenCalledWith(mockConfigFiles[0]);
+      expect(mockDialogRef.close).toHaveBeenCalledWith(mockConfigFiles[0]);
     });
 
-    it('should not emit apply when no file selected', () => {
-      const applySpy = vi.fn();
-      component.apply.subscribe(applySpy);
+    it('should not call dialogRef.close when no file selected', () => {
       component.selectedFile = null;
 
       component.onApply();
 
-      expect(applySpy).not.toHaveBeenCalled();
+      expect(mockDialogRef.close).not.toHaveBeenCalled();
     });
 
     it('should update search query on search change', () => {

@@ -95,11 +95,3 @@
     </div>
   </div>
 </em-main-layout>
-
-<!-- Configuration Modal -->
-<em-config-file-modal
-  [isOpen]="isConfigModalOpen()"
-  [configFiles]="configFiles"
-  (closed)="onConfigModalClose()"
-  (apply)="onConfigFileApply($event)"
-></em-config-file-modal>

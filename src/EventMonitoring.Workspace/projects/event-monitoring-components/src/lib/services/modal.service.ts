@@ -1,4 +1,5 @@
-import { Injectable } from '@angular/core';
+import { Injectable, ComponentRef, Type } from '@angular/core';
+import { MatDialog, MatDialogRef } from '@angular/material/dialog';
 import { BehaviorSubject, Observable } from 'rxjs';
 
 export interface ModalConfig {
@@ -22,12 +23,27 @@ export class ModalService {
 
   readonly state$: Observable<ModalState> = this.stateSubject.asObservable();
 
+  // Track MatDialog references by modal ID
+  private dialogRefs = new Map<string, MatDialogRef<any>>();
+  // Track component types registered by modal ID
+  private componentRegistry = new Map<string, Type<any>>();
+
+  constructor(private dialog: MatDialog) {}
+
   get activeModals(): string[] {
     return this.stateSubject.value.activeModals;
   }
 
   isOpen(modalId: string): boolean {
     return this.stateSubject.value.activeModals.includes(modalId);
+  }
+
+  /**
+   * Register a component to be used for a specific modal ID
+   * This should be called during app initialization
+   */
+  registerComponent(modalId: string, component: Type<any>): void {
+    this.componentRegistry.set(modalId, component);
   }
 
   open(config: ModalConfig | string): void {
@@ -47,6 +63,23 @@ export class ModalService {
       activeModals: [...currentState.activeModals, modalConfig.id],
       modalData: newModalData,
     });
+
+    // Open MatDialog if component is registered
+    const component = this.componentRegistry.get(modalConfig.id);
+    if (component) {
+      const dialogRef = this.dialog.open(component, {
+        data: modalConfig.data,
+        disableClose: false,
+        panelClass: 'em-dialog',
+      });
+
+      this.dialogRefs.set(modalConfig.id, dialogRef);
+
+      // Handle dialog close
+      dialogRef.afterClosed().subscribe(() => {
+        this.close(modalConfig.id);
+      });
+    }
   }
 
   close(modalId: string): void {
@@ -58,6 +91,13 @@ export class ModalService {
       activeModals: currentState.activeModals.filter((id) => id !== modalId),
       modalData: newModalData,
     });
+
+    // Close MatDialog if it exists
+    const dialogRef = this.dialogRefs.get(modalId);
+    if (dialogRef) {
+      dialogRef.close();
+      this.dialogRefs.delete(modalId);
+    }
   }
 
   closeAll(): void {
@@ -65,6 +105,10 @@ export class ModalService {
       activeModals: [],
       modalData: new Map(),
     });
+
+    // Close all MatDialogs
+    this.dialog.closeAll();
+    this.dialogRefs.clear();
   }
 
   getData<T>(modalId: string): T | undefined {

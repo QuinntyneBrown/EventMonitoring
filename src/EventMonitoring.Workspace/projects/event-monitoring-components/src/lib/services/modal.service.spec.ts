@@ -1,12 +1,25 @@
 import { TestBed } from '@angular/core/testing';
+import { MatDialog, MatDialogRef } from '@angular/material/dialog';
 import { ModalService, ModalConfig } from './modal.service';
+import { of } from 'rxjs';
 
 describe('ModalService', () => {
   let service: ModalService;
+  let mockDialog: jasmine.SpyObj<MatDialog>;
+  let mockDialogRef: jasmine.SpyObj<MatDialogRef<any>>;
 
   beforeEach(() => {
+    mockDialogRef = jasmine.createSpyObj('MatDialogRef', ['close', 'afterClosed']);
+    mockDialogRef.afterClosed.and.returnValue(of(undefined));
+    
+    mockDialog = jasmine.createSpyObj('MatDialog', ['open', 'closeAll']);
+    mockDialog.open.and.returnValue(mockDialogRef);
+
     TestBed.configureTestingModule({
-      providers: [ModalService],
+      providers: [
+        ModalService,
+        { provide: MatDialog, useValue: mockDialog },
+      ],
     });
     service = TestBed.inject(ModalService);
   });
