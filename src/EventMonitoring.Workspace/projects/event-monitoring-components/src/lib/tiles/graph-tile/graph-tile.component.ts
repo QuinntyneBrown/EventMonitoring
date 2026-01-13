@@ -57,7 +57,7 @@ export class GraphTileComponent implements AfterViewInit, OnDestroy, OnChanges {
   @Output() actionClick = new EventEmitter<string>();
 
   private chart: unknown = null;
-  private chartJsLoaded = false;
+  protected chartJsLoaded = false;
 
   ngAfterViewInit(): void {
     this.initChart();

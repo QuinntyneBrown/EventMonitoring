@@ -45,7 +45,7 @@ export class DashboardGridComponent implements AfterViewInit, OnDestroy, OnChang
   @Output() itemRemove = new EventEmitter<string>();
 
   private grid: unknown = null;
-  private gridStackLoaded = false;
+  protected gridStackLoaded = false;
 
   constructor(
     private elementRef: ElementRef,

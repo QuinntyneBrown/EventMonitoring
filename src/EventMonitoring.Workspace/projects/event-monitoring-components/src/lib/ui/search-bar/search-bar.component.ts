@@ -28,10 +28,9 @@ export class SearchBarComponent implements ControlValueAccessor {
   @Input() placeholder = 'Search...';
   @Input() icon = 'search';
   @Input() disabled = false;
+  @Input() value = '';
 
   @Output() searchChange = new EventEmitter<string>();
-
-  value = '';
 
   private onChange: (value: string) => void = () => {};
   private onTouched: () => void = () => {};

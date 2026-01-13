@@ -33,6 +33,12 @@
     },
     {
       "path": "./projects/event-monitoring-components/tsconfig.spec.json"
+    },
+    {
+      "path": "./projects/event-monitoring/tsconfig.app.json"
+    },
+    {
+      "path": "./projects/event-monitoring/tsconfig.spec.json"
     }
   ]
 }
