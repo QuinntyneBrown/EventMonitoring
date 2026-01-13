@@ -1,13 +1,11 @@
 import {
   Component,
-  Input,
-  Output,
-  EventEmitter,
+  Inject,
   ChangeDetectionStrategy,
 } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { ModalOverlayComponent } from '../modal-overlay/modal-overlay.component';
+import { MatDialogModule, MatDialogRef, MAT_DIALOG_DATA } from '@angular/material/dialog';
 import { SearchBarComponent } from '../../ui/search-bar/search-bar.component';
 import { ButtonComponent } from '../../ui/button/button.component';
 
@@ -20,23 +18,31 @@ export interface ConfigFile {
   items?: string[];
 }
 
+export interface ConfigFileModalData {
+  configFiles: ConfigFile[];
+}
+
 @Component({
   selector: 'em-config-file-modal',
   standalone: true,
-  imports: [CommonModule, FormsModule, ModalOverlayComponent, SearchBarComponent, ButtonComponent],
+  imports: [CommonModule, FormsModule, MatDialogModule, SearchBarComponent, ButtonComponent],
   templateUrl: './config-file-modal.component.html',
   styleUrls: ['./config-file-modal.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class ConfigFileModalComponent {
-  @Input() isOpen = false;
-  @Input() configFiles: ConfigFile[] = [];
-
-  @Output() closed = new EventEmitter<void>();
-  @Output() apply = new EventEmitter<ConfigFile>();
-
+  configFiles: ConfigFile[] = [];
   selectedFile: ConfigFile | null = null;
   searchQuery = '';
+
+  constructor(
+    public dialogRef: MatDialogRef<ConfigFileModalComponent>,
+    @Inject(MAT_DIALOG_DATA) public data: ConfigFileModalData
+  ) {
+    if (data?.configFiles) {
+      this.configFiles = data.configFiles;
+    }
+  }
 
   get filteredFiles(): ConfigFile[] {
     if (!this.searchQuery) {
@@ -51,7 +57,7 @@ export class ConfigFileModalComponent {
   }
 
   onClose(): void {
-    this.closed.emit();
+    this.dialogRef.close();
     this.selectedFile = null;
     this.searchQuery = '';
   }
@@ -66,8 +72,9 @@ export class ConfigFileModalComponent {
 
   onApply(): void {
     if (this.selectedFile) {
-      this.apply.emit(this.selectedFile);
-      this.onClose();
+      this.dialogRef.close(this.selectedFile);
+      this.selectedFile = null;
+      this.searchQuery = '';
     }
   }
 

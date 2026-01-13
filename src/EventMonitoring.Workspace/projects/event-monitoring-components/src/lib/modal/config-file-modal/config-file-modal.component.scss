@@ -1,3 +1,62 @@
+.modal-header {
+  display: flex;
+  align-items: center;
+  gap: var(--em-spacing-sm);
+  padding: 0;
+  margin-bottom: var(--em-spacing-md);
+
+  h2 {
+    flex: 1;
+    margin: 0;
+    font-size: var(--em-font-size-lg);
+    font-weight: 600;
+    color: var(--em-color-text-high);
+  }
+
+  &__icon {
+    color: var(--em-color-primary);
+    font-size: 24px;
+
+    &--secondary {
+      color: var(--em-color-secondary);
+    }
+  }
+
+  &__close {
+    background: none;
+    border: none;
+    color: var(--em-color-text-medium);
+    cursor: pointer;
+    padding: var(--em-spacing-xs);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: var(--em-radius-sm);
+    transition: var(--em-transition-fast);
+
+    &:hover {
+      background-color: var(--em-color-surface-variant);
+      color: var(--em-color-text-high);
+    }
+
+    .material-icons {
+      font-size: 20px;
+    }
+  }
+}
+
+.modal-content {
+  padding: 0;
+}
+
+.modal-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: var(--em-spacing-sm);
+  padding: 0;
+  margin-top: var(--em-spacing-lg);
+}
+
 .section-title {
   font-size: var(--em-font-size-xs);
   font-weight: 500;
