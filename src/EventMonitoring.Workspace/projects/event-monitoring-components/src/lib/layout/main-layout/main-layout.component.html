@@ -12,11 +12,17 @@
   ></em-header>
 
   @if (!sidenavCollapsed) {
-    <em-sidenav
-      [sections]="sidenavSections"
-      [activeItemId]="activeNavItemId"
-      (itemClick)="onNavItemClick($event)"
-    ></em-sidenav>
+    @if (editModeActive) {
+      <div class="main-layout__edit-sidenav">
+        <ng-content select="[sidenav-edit-content]"></ng-content>
+      </div>
+    } @else {
+      <em-sidenav
+        [sections]="sidenavSections"
+        [activeItemId]="activeNavItemId"
+        (itemClick)="onNavItemClick($event)"
+      ></em-sidenav>
+    }
   }
 
   <em-content [class.content--full-width]="sidenavCollapsed">

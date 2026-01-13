@@ -11,6 +11,10 @@
     "build:lib:watch": "ng build event-monitoring-components --watch",
     "test:lib": "vitest run --project event-monitoring-components",
     "test:lib:coverage": "vitest run --coverage",
+    "test:e2e": "playwright test",
+    "test:e2e:ui": "playwright test --ui",
+    "test:e2e:headed": "playwright test --headed",
+    "test:e2e:debug": "playwright test --debug",
     "storybook": "ng run event-monitoring-components:storybook",
     "build-storybook": "ng run event-monitoring-components:build-storybook"
   },
@@ -48,6 +52,7 @@
     "@angular/build": "^21.0.5",
     "@angular/cli": "^21.0.5",
     "@angular/compiler-cli": "^21.0.0",
+    "@playwright/test": "^1.57.0",
     "@storybook/addon-a11y": "^8.6.15",
     "@storybook/addon-essentials": "^8.6.15",
     "@storybook/addon-interactions": "^8.6.15",
