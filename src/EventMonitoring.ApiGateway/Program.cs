@@ -3,7 +3,7 @@
 
 var builder = WebApplication.CreateBuilder(args);
 
-builder.Services.AddApiGatewayServices();
+builder.Services.AddApiGatewayServices(builder.Configuration);
 
 var app = builder.Build();
 
@@ -15,10 +15,13 @@ if (app.Environment.IsDevelopment())
 
 app.UseHttpsRedirection();
 
+app.UseCors("CorsPolicy");
+
 app.UseAuthorization();
 
 app.MapControllers();
 
-app.UseCors("CorsPolicy");
+// Map YARP reverse proxy routes
+app.MapReverseProxy();
 
 app.Run();
