@@ -86,7 +86,7 @@ export class DashboardService {
     }
 
     const tiles = this.tilesSubject.value;
-    const id = `tile-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
+    const id = `tile-${Date.now()}-${Math.random().toString(36).substring(2, 11)}`;
 
     const defaultSizes: Record<TileType, { w: number; h: number }> = {
       'telemetry-state': { w: 12, h: 4 },

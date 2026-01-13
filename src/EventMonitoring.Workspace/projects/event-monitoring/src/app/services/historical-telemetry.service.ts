@@ -1,5 +1,5 @@
 import { Injectable } from '@angular/core';
-import { Observable, of, BehaviorSubject } from 'rxjs';
+import { Observable, of, BehaviorSubject, firstValueFrom } from 'rxjs';
 import { delay, map } from 'rxjs/operators';
 import { TelemetryMessage } from './telemetry.service';
 
@@ -84,10 +84,10 @@ export class HistoricalTelemetryService {
     let hasMore = true;
 
     while (hasMore) {
-      const response = await this.queryHistoricalData({
+      const response = await firstValueFrom(this.queryHistoricalData({
         ...query,
         page: currentPage,
-      }).toPromise();
+      }));
 
       if (response) {
         allRecords.push(...response.records);

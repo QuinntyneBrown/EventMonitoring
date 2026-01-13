@@ -278,49 +278,53 @@ export class DashboardComponent implements OnInit, OnDestroy {
 
   async onHistoricalDataRequest(startTime: Date, endTime: Date): Promise<void> {
     try {
-      // Load all historical data
-      const data = await this.historicalTelemetryService.loadAllHistoricalData({
-        startTime,
-        endTime,
-      });
-
-      // Update timeline
-      this.timeline = {
-        startTime: startTime.toISOString(),
-        endTime: endTime.toISOString(),
-        currentTime: startTime.toISOString(),
-        progress: 0,
-      };
-
-      // Update stats
-      this.telemetryStats = {
-        ...this.telemetryStats,
-        totalRecords: data.length,
-      };
-
-      // Start playback
-      this.historicalTelemetryService.startPlayback(startTime, endTime, 1);
-
-      // Subscribe to playback state
-      this.historicalTelemetryService.playbackState$
-        .pipe(takeUntil(this.destroy$))
-        .subscribe((state) => {
-          this.timeline = {
-            ...this.timeline,
-            currentTime: state.currentTime.toISOString(),
-            progress: state.progress,
-          };
-          this.isPlaying = state.isPlaying;
-
-          // Update tiles with telemetry at current time
-          const currentTelemetry = this.historicalTelemetryService.getTelemetryAtTime(
-            state.currentTime
-          );
-          currentTelemetry.forEach((message) => this.updateTileData(message));
-        });
+      const data = await this.loadHistoricalData(startTime, endTime);
+      this.initializeReviewMode(startTime, endTime, data.length);
+      this.subscribeToPlaybackUpdates();
     } catch (error) {
       console.error('Error loading historical data:', error);
     }
+  }
+
+  private async loadHistoricalData(startTime: Date, endTime: Date): Promise<TelemetryMessage[]> {
+    return await this.historicalTelemetryService.loadAllHistoricalData({
+      startTime,
+      endTime,
+    });
+  }
+
+  private initializeReviewMode(startTime: Date, endTime: Date, totalRecords: number): void {
+    this.timeline = {
+      startTime: startTime.toISOString(),
+      endTime: endTime.toISOString(),
+      currentTime: startTime.toISOString(),
+      progress: 0,
+    };
+
+    this.telemetryStats = {
+      ...this.telemetryStats,
+      totalRecords,
+    };
+
+    this.historicalTelemetryService.startPlayback(startTime, endTime, 1);
+  }
+
+  private subscribeToPlaybackUpdates(): void {
+    this.historicalTelemetryService.playbackState$
+      .pipe(takeUntil(this.destroy$))
+      .subscribe((state) => {
+        this.timeline = {
+          ...this.timeline,
+          currentTime: state.currentTime.toISOString(),
+          progress: state.progress,
+        };
+        this.isPlaying = state.isPlaying;
+
+        const currentTelemetry = this.historicalTelemetryService.getTelemetryAtTime(
+          state.currentTime
+        );
+        currentTelemetry.forEach((message) => this.updateTileData(message));
+      });
   }
 
   onTelemetryPlayPause(): void {
