@@ -7,12 +7,12 @@ test.describe('Configuration File Modal', () => {
     // Enter edit mode
     await page.locator('button').filter({ hasText: /edit/i }).click();
     
-    // Add telemetry state tile
-    await page.locator('button').filter({ hasText: 'Telemetry State' }).click();
+    // Add telemetry state tile - use data attribute for precise targeting
+    await page.locator('button[data-tile-type="telemetry-state"]').click();
     await page.waitForTimeout(500);
     
-    // Add a graph tile
-    await page.locator('button').filter({ hasText: 'Graph Tile' }).click();
+    // Add a graph tile - use data attribute for precise targeting
+    await page.locator('button[data-tile-type="graph"]').click();
     await page.waitForTimeout(500);
   });
 
@@ -29,10 +29,13 @@ test.describe('Configuration File Modal', () => {
   test('should display list of configuration files in modal', async ({ page }) => {
     // Open modal
     await page.locator('span.material-icons').filter({ hasText: 'folder_open' }).first().click();
-    await page.waitForTimeout(500);
     
-    // Check for configuration file names within the dialog
-    await expect(page.locator('text=Spacecraft Sensors').or(page.locator('text=Navigation Systems'))).toBeVisible();
+    // Wait for modal to be visible
+    await expect(page.locator('.cdk-overlay-container em-config-file-modal')).toBeVisible();
+    
+    // Check for configuration file names within the dialog - wait a bit longer for data to load
+    await expect(page.locator('text=Spacecraft Sensors')).toBeVisible({ timeout: 10000 });
+    await expect(page.locator('text=Navigation Systems')).toBeVisible();
   });
 
   test('should allow searching configuration files', async ({ page }) => {
@@ -68,15 +71,14 @@ test.describe('Configuration File Modal', () => {
   test('should close modal when close button is clicked', async ({ page }) => {
     // Open modal
     await page.locator('span.material-icons').filter({ hasText: 'folder_open' }).first().click();
-    await page.waitForTimeout(500);
+    
+    // Wait for modal to be visible
+    await expect(page.locator('.cdk-overlay-container em-config-file-modal')).toBeVisible();
     
     // Click close button (Material dialog close button)
-    const closeButton = page.locator('.modal-header__close').or(page.locator('button').filter({ hasText: /close|cancel/i }));
-    if (await closeButton.count() > 0) {
-      await closeButton.first().click();
-    }
-    
-    await page.waitForTimeout(300);
+    const closeButton = page.locator('.modal-header__close');
+    await expect(closeButton).toBeVisible();
+    await closeButton.click();
     
     // Verify modal is closed - check that dialog overlay is gone
     await expect(page.locator('.cdk-overlay-container em-config-file-modal')).not.toBeVisible();
@@ -106,11 +108,13 @@ test.describe('Configuration File Modal', () => {
   test('should close modal when clicking backdrop', async ({ page }) => {
     // Open modal
     await page.locator('span.material-icons').filter({ hasText: 'folder_open' }).first().click();
-    await page.waitForTimeout(500);
     
-    // Click on the backdrop (outside the dialog)
-    await page.locator('.cdk-overlay-backdrop').click();
-    await page.waitForTimeout(300);
+    // Wait for modal to be visible
+    await expect(page.locator('.cdk-overlay-container em-config-file-modal')).toBeVisible();
+    
+    // Click on the backdrop by clicking outside the dialog using position
+    // Get the dialog position and click to the left of it
+    await page.mouse.click(10, 10);
     
     // Verify modal is closed
     await expect(page.locator('.cdk-overlay-container em-config-file-modal')).not.toBeVisible();
