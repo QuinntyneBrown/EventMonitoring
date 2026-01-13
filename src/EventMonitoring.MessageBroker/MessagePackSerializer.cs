@@ -42,26 +42,27 @@ public sealed class MessagePackSerializer : IMessageSerializer
     {
         try
         {
-            // Deserialize the full envelope to access the header
-            // MessagePack doesn't easily support partial deserialization without knowing the type
-            // For a more efficient implementation, we would need to use MessagePackReader to manually parse
-            // For now, we deserialize enough to get the header from the envelope structure
+            // For simplicity and correctness, we deserialize just the header part
+            // MessagePack doesn't easily support efficient partial deserialization
+            // We read the array header, then deserialize just the first element (the header)
             var reader = new MessagePackReader(data);
             
-            // Read the envelope array (should have 2 elements: header and payload)
-            if (reader.TryReadArrayHeader(out var arrayLength) && arrayLength == 2)
-            {
-                // Read the header (first element)
-                var headerData = reader.ReadRaw();
-                var header = MessagePack.MessagePackSerializer.Deserialize<MessageHeader>(headerData, _options);
-                
-                // Resolve the payload type from the registry
-                var payloadType = _typeRegistry.GetType(header.MessageType);
-                
-                return (header, payloadType);
-            }
+            // Read array header - envelope should have 2 elements [header, payload]
+            var arrayLength = reader.ReadArrayHeader();
+            if (arrayLength != 2)
+                return null;
             
-            return null;
+            // Now reader is positioned at the header element
+            // Get the remaining bytes from current position
+            var sequence = reader.Sequence.Slice(reader.Consumed);
+            
+            // Deserialize the header from the current position
+            var header = MessagePack.MessagePackSerializer.Deserialize<MessageHeader>(sequence, _options);
+            
+            // Resolve the payload type from the registry
+            var payloadType = _typeRegistry.GetType(header.MessageType);
+            
+            return (header, payloadType);
         }
         catch
         {
