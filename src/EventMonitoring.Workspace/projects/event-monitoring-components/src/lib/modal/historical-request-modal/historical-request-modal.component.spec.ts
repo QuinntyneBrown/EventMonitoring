@@ -1,14 +1,24 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { vi } from 'vitest';
-import { HistoricalRequestModalComponent, TimeRange } from './historical-request-modal.component';
+import { MatDialogRef, MAT_DIALOG_DATA } from '@angular/material/dialog';
+import { HistoricalRequestModalComponent, TimeRange, HistoricalRequestModalData } from './historical-request-modal.component';
 
 describe('HistoricalRequestModalComponent', () => {
   let component: HistoricalRequestModalComponent;
   let fixture: ComponentFixture<HistoricalRequestModalComponent>;
+  let mockDialogRef: { close: ReturnType<typeof vi.fn> };
 
   beforeEach(async () => {
+    mockDialogRef = {
+      close: vi.fn(),
+    };
+
     await TestBed.configureTestingModule({
       imports: [HistoricalRequestModalComponent],
+      providers: [
+        { provide: MatDialogRef, useValue: mockDialogRef },
+        { provide: MAT_DIALOG_DATA, useValue: {} as HistoricalRequestModalData },
+      ],
     }).compileComponents();
 
     fixture = TestBed.createComponent(HistoricalRequestModalComponent);
@@ -21,42 +31,25 @@ describe('HistoricalRequestModalComponent', () => {
       expect(component).toBeTruthy();
     });
 
-    it('should render modal overlay', () => {
-      component.isOpen = true;
-      fixture.detectChanges();
-
-      const modal = fixture.nativeElement.querySelector('em-modal-overlay');
-      expect(modal).toBeTruthy();
-    });
-
     it('should render info box', () => {
-      component.isOpen = true;
-      fixture.detectChanges();
-
       const infoBox = fixture.nativeElement.querySelector('em-info-box');
       expect(infoBox).toBeTruthy();
     });
 
     it('should render quick select buttons', () => {
-      component.isOpen = true;
-      fixture.detectChanges();
-
       const buttons = fixture.nativeElement.querySelectorAll('.quick-select__btn');
       expect(buttons.length).toBe(5); // 4 time ranges + custom
     });
 
     it('should render datetime inputs', () => {
-      component.isOpen = true;
       fixture.detectChanges();
 
       const inputs = fixture.nativeElement.querySelectorAll('.form-group__input');
+      const inputs = fixture.nativeElement.querySelectorAll('input[type="datetime-local"]');
       expect(inputs.length).toBe(2);
     });
 
     it('should render summary section', () => {
-      component.isOpen = true;
-      fixture.detectChanges();
-
       const summary = fixture.nativeElement.querySelector('.summary');
       expect(summary).toBeTruthy();
     });
@@ -224,26 +217,20 @@ describe('HistoricalRequestModalComponent', () => {
   });
 
   describe('events', () => {
-    it('should emit closed on close', () => {
-      const closedSpy = vi.fn();
-      component.closed.subscribe(closedSpy);
-
+    it('should call dialogRef.close on close', () => {
       component.onClose();
 
-      expect(closedSpy).toHaveBeenCalled();
+      expect(mockDialogRef.close).toHaveBeenCalled();
     });
 
-    it('should emit loadData with request details', () => {
+    it('should call dialogRef.close with request details on load data', () => {
       component.startDateTime = '2026-01-11T08:00';
       component.endDateTime = '2026-01-11T16:00';
       component.activeSubscriptions = 12;
 
-      const loadDataSpy = vi.fn();
-      component.loadData.subscribe(loadDataSpy);
-
       component.onLoadData();
 
-      expect(loadDataSpy).toHaveBeenCalledWith(
+      expect(mockDialogRef.close).toHaveBeenCalledWith(
         expect.objectContaining({
           startDateTime: '2026-01-11T08:00',
           endDateTime: '2026-01-11T16:00',
@@ -251,17 +238,6 @@ describe('HistoricalRequestModalComponent', () => {
           activeSubscriptions: 12,
         })
       );
-    });
-
-    it('should close modal after loading data', () => {
-      const closedSpy = vi.fn();
-      component.closed.subscribe(closedSpy);
-      component.startDateTime = '2026-01-11T08:00';
-      component.endDateTime = '2026-01-11T16:00';
-
-      component.onLoadData();
-
-      expect(closedSpy).toHaveBeenCalled();
     });
   });
 });
