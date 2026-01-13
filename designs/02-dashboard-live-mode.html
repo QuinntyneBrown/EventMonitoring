@@ -1,0 +1,530 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Event Monitoring - Dashboard (Live Mode)</title>
+  <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500&family=Roboto+Mono&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <style>
+    /* Angular Material Dark Theme Colors Only (REQ-UI-006)
+       Primary: #bb86fc
+       Secondary: #03dac6
+       Error: #cf6679
+       Surface: #1f1f1f
+       Background: #121212
+    */
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body {
+      font-family: 'Roboto', sans-serif;
+      background-color: #121212;
+      color: #ffffff;
+      min-height: 100vh;
+    }
+
+    .main-layout { display: flex; flex-direction: column; min-height: 100vh; }
+
+    /* Header */
+    .header {
+      background-color: #1f1f1f;
+      height: 64px;
+      display: flex;
+      align-items: center;
+      padding: 0 16px;
+      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+      position: fixed;
+      top: 0; left: 0; right: 0;
+      z-index: 1000;
+    }
+    .header__menu-btn {
+      background: none; border: none; color: #ffffff; cursor: pointer;
+      padding: 8px; border-radius: 50%;
+      display: flex; align-items: center; justify-content: center;
+    }
+    .header__menu-btn:hover { background-color: rgba(255, 255, 255, 0.1); }
+    .header__logo { display: flex; align-items: center; margin-left: 16px; }
+    .header__logo-icon { color: #bb86fc; margin-right: 8px; }
+    .header__title { font-size: 20px; font-weight: 500; color: #ffffff; }
+    .header__spacer { flex: 1; }
+    .header__mode-indicator {
+      display: flex; align-items: center;
+      padding: 6px 16px; border-radius: 16px;
+      font-size: 14px; font-weight: 500; margin-right: 16px;
+    }
+    .header__mode-indicator--live { background-color: rgba(187, 134, 252, 0.2); color: #bb86fc; }
+    .header__mode-dot {
+      width: 8px; height: 8px; border-radius: 50%; margin-right: 8px;
+      animation: pulse 2s infinite;
+    }
+    .header__mode-dot--live { background-color: #bb86fc; }
+    @keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.5; } }
+    .header__actions { display: flex; align-items: center; gap: 8px; }
+    .header__btn {
+      background: none; border: none; color: #ffffff; cursor: pointer;
+      padding: 8px; border-radius: 50%;
+      display: flex; align-items: center; justify-content: center;
+    }
+    .header__btn:hover { background-color: rgba(255, 255, 255, 0.1); }
+    .header__edit-toggle {
+      display: flex; align-items: center;
+      padding: 6px 12px; border-radius: 4px;
+      background-color: transparent; border: 1px solid #bb86fc;
+      color: #bb86fc; cursor: pointer; font-size: 14px; margin-right: 8px;
+    }
+    .header__edit-toggle:hover { background-color: rgba(187, 134, 252, 0.1); }
+
+    /* Sidenav */
+    .sidenav {
+      width: 256px; background-color: #1f1f1f;
+      position: fixed; top: 64px; left: 0; bottom: 0;
+      padding-top: 8px; border-right: 1px solid #333;
+    }
+    .sidenav__section { padding: 8px 0; }
+    .sidenav__section-title {
+      padding: 8px 16px; font-size: 12px; font-weight: 500;
+      color: rgba(255, 255, 255, 0.6);
+      text-transform: uppercase; letter-spacing: 0.5px;
+    }
+    .sidenav__item {
+      display: flex; align-items: center;
+      padding: 12px 16px; color: rgba(255, 255, 255, 0.87);
+      text-decoration: none; cursor: pointer;
+      transition: background-color 0.2s;
+    }
+    .sidenav__item:hover { background-color: rgba(255, 255, 255, 0.05); }
+    .sidenav__item--active { background-color: rgba(187, 134, 252, 0.15); color: #bb86fc; }
+    .sidenav__item-icon { margin-right: 16px; opacity: 0.7; }
+    .sidenav__item--active .sidenav__item-icon { opacity: 1; color: #bb86fc; }
+    .sidenav__divider { height: 1px; background-color: #333; margin: 8px 0; }
+
+    /* Content */
+    .content {
+      margin-left: 256px; margin-top: 64px; padding: 16px;
+      min-height: calc(100vh - 64px); background-color: #121212;
+    }
+
+    /* Dashboard Grid */
+    .dashboard-grid {
+      display: grid;
+      grid-template-columns: repeat(12, 1fr);
+      grid-auto-rows: minmax(60px, auto);
+      gap: 16px;
+    }
+
+    /* Tile */
+    .tile {
+      background-color: #1f1f1f; border-radius: 8px; overflow: hidden;
+      display: flex; flex-direction: column;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+    }
+    .tile__header {
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 12px 16px; background-color: #2a2a2a;
+      border-bottom: 1px solid #333;
+    }
+    .tile__title {
+      font-size: 14px; font-weight: 500; color: rgba(255, 255, 255, 0.87);
+      display: flex; align-items: center;
+    }
+    .tile__title-icon { font-size: 18px; margin-right: 8px; color: #bb86fc; }
+    .tile__actions { display: flex; gap: 4px; }
+    .tile__action-btn {
+      background: none; border: none; color: rgba(255, 255, 255, 0.6);
+      cursor: pointer; padding: 4px; border-radius: 4px;
+      display: flex; align-items: center; justify-content: center;
+    }
+    .tile__action-btn:hover { background-color: rgba(255, 255, 255, 0.1); color: #ffffff; }
+    .tile__content { flex: 1; padding: 16px; display: flex; flex-direction: column; }
+
+    /* Telemetry State Tile */
+    .tile--telemetry-state { grid-column: span 12; grid-row: span 2; }
+    .telemetry-state { display: flex; flex-direction: column; gap: 16px; }
+    .telemetry-state__controls { display: flex; align-items: center; gap: 16px; flex-wrap: wrap; }
+    .telemetry-state__mode-toggle {
+      display: flex; background-color: #333; border-radius: 4px; overflow: hidden;
+    }
+    .telemetry-state__mode-btn {
+      padding: 8px 16px; border: none; background: none;
+      color: rgba(255, 255, 255, 0.6); cursor: pointer; font-size: 14px;
+      display: flex; align-items: center; gap: 4px;
+    }
+    .telemetry-state__mode-btn--active { background-color: #bb86fc; color: #121212; }
+    .telemetry-state__playback { display: flex; align-items: center; gap: 8px; }
+    .telemetry-state__playback-btn {
+      background: none; border: 1px solid #555; color: #ffffff;
+      cursor: pointer; padding: 8px; border-radius: 50%;
+      display: flex; align-items: center; justify-content: center;
+    }
+    .telemetry-state__playback-btn:hover { background-color: rgba(255, 255, 255, 0.1); border-color: #bb86fc; }
+    .telemetry-state__playback-btn--primary { background-color: #bb86fc; border-color: #bb86fc; color: #121212; }
+    .telemetry-state__timeline { flex: 1; display: flex; flex-direction: column; gap: 8px; }
+    .telemetry-state__timeline-bar {
+      height: 8px; background-color: #333; border-radius: 4px;
+      position: relative; cursor: pointer;
+    }
+    .telemetry-state__timeline-progress {
+      height: 100%; background: linear-gradient(90deg, #bb86fc, #ce9ffc);
+      border-radius: 4px; width: 75%;
+    }
+    .telemetry-state__timeline-handle {
+      position: absolute; top: 50%; left: 75%;
+      transform: translate(-50%, -50%);
+      width: 16px; height: 16px; background-color: #ffffff;
+      border-radius: 50%; box-shadow: 0 2px 4px rgba(0, 0, 0, 0.3); cursor: grab;
+    }
+    .telemetry-state__time-labels {
+      display: flex; justify-content: space-between;
+      font-size: 12px; color: rgba(255, 255, 255, 0.6);
+    }
+    .telemetry-state__stats { display: flex; gap: 24px; flex-wrap: wrap; }
+    .telemetry-state__stat { display: flex; flex-direction: column; }
+    .telemetry-state__stat-label { font-size: 12px; color: rgba(255, 255, 255, 0.6); margin-bottom: 4px; }
+    .telemetry-state__stat-value { font-size: 16px; font-weight: 500; color: #03dac6; }
+
+    /* Graph Tile */
+    .tile--graph { grid-column: span 6; grid-row: span 4; }
+    .graph-tile__chart-container { flex: 1; position: relative; min-height: 200px; }
+
+    /* Tabular Tile */
+    .tile--tabular { grid-column: span 6; grid-row: span 4; }
+    .tabular-tile__table { width: 100%; border-collapse: collapse; font-size: 13px; }
+    .tabular-tile__table th {
+      text-align: left; padding: 8px 12px; background-color: #2a2a2a;
+      color: rgba(255, 255, 255, 0.87); font-weight: 500; border-bottom: 1px solid #333;
+    }
+    .tabular-tile__table td {
+      padding: 8px 12px; border-bottom: 1px solid #333; color: rgba(255, 255, 255, 0.87);
+    }
+    .tabular-tile__table tr:hover { background-color: rgba(255, 255, 255, 0.05); }
+    .tabular-tile__value--numeric { font-family: 'Roboto Mono', monospace; color: #03dac6; }
+    .tabular-tile__value--warning { color: #cf6679; }
+    .tabular-tile__value--critical { color: #cf6679; }
+    .tabular-tile__timestamp { color: rgba(255, 255, 255, 0.5); font-size: 11px; }
+
+    /* Status Badge */
+    .status-badge {
+      display: inline-flex; align-items: center;
+      padding: 2px 8px; border-radius: 12px; font-size: 11px; font-weight: 500;
+    }
+    .status-badge--normal { background-color: rgba(3, 218, 198, 0.2); color: #03dac6; }
+    .status-badge--warning { background-color: rgba(207, 102, 121, 0.2); color: #cf6679; }
+    .status-badge--critical { background-color: rgba(207, 102, 121, 0.3); color: #cf6679; }
+  </style>
+</head>
+<body>
+  <div class="main-layout">
+    <!-- Header -->
+    <header class="header">
+      <button class="header__menu-btn"><span class="material-icons">menu</span></button>
+      <div class="header__logo">
+        <span class="material-icons header__logo-icon">satellite_alt</span>
+        <span class="header__title">Event Monitoring System</span>
+      </div>
+      <div class="header__spacer"></div>
+      <div class="header__mode-indicator header__mode-indicator--live">
+        <span class="header__mode-dot header__mode-dot--live"></span>
+        LIVE MODE
+      </div>
+      <button class="header__edit-toggle">
+        <span class="material-icons" style="font-size: 18px; margin-right: 4px;">edit</span>
+        Edit Mode
+      </button>
+      <div class="header__actions">
+        <button class="header__btn"><span class="material-icons">notifications</span></button>
+        <button class="header__btn"><span class="material-icons">settings</span></button>
+        <button class="header__btn"><span class="material-icons">account_circle</span></button>
+      </div>
+    </header>
+
+    <!-- Sidenav -->
+    <nav class="sidenav">
+      <div class="sidenav__section">
+        <div class="sidenav__section-title">Main</div>
+        <a class="sidenav__item sidenav__item--active">
+          <span class="material-icons sidenav__item-icon">dashboard</span>Dashboard
+        </a>
+        <a class="sidenav__item">
+          <span class="material-icons sidenav__item-icon">show_chart</span>Telemetry
+        </a>
+        <a class="sidenav__item">
+          <span class="material-icons sidenav__item-icon">history</span>Historical Data
+        </a>
+      </div>
+      <div class="sidenav__divider"></div>
+      <div class="sidenav__section">
+        <div class="sidenav__section-title">Configuration</div>
+        <a class="sidenav__item">
+          <span class="material-icons sidenav__item-icon">folder</span>Config Files
+        </a>
+        <a class="sidenav__item">
+          <span class="material-icons sidenav__item-icon">tune</span>Settings
+        </a>
+      </div>
+      <div class="sidenav__divider"></div>
+      <div class="sidenav__section">
+        <div class="sidenav__section-title">System</div>
+        <a class="sidenav__item">
+          <span class="material-icons sidenav__item-icon">monitor_heart</span>Health Status
+        </a>
+      </div>
+    </nav>
+
+    <!-- Main Content -->
+    <main class="content">
+      <div class="dashboard-grid">
+        <!-- Telemetry State Tile -->
+        <div class="tile tile--telemetry-state">
+          <div class="tile__header">
+            <span class="tile__title">
+              <span class="material-icons tile__title-icon">timeline</span>
+              Telemetry State Control
+            </span>
+            <div class="tile__actions">
+              <button class="tile__action-btn"><span class="material-icons" style="font-size: 18px;">settings</span></button>
+            </div>
+          </div>
+          <div class="tile__content">
+            <div class="telemetry-state">
+              <div class="telemetry-state__controls">
+                <div class="telemetry-state__mode-toggle">
+                  <button class="telemetry-state__mode-btn telemetry-state__mode-btn--active">
+                    <span class="material-icons" style="font-size: 16px;">broadcast_on_personal</span>Live
+                  </button>
+                  <button class="telemetry-state__mode-btn">
+                    <span class="material-icons" style="font-size: 16px;">history</span>Review
+                  </button>
+                </div>
+                <div class="telemetry-state__playback">
+                  <button class="telemetry-state__playback-btn"><span class="material-icons" style="font-size: 18px;">skip_previous</span></button>
+                  <button class="telemetry-state__playback-btn telemetry-state__playback-btn--primary">
+                    <span class="material-icons" style="font-size: 24px;">pause</span>
+                  </button>
+                  <button class="telemetry-state__playback-btn"><span class="material-icons" style="font-size: 18px;">skip_next</span></button>
+                </div>
+                <div class="telemetry-state__stats">
+                  <div class="telemetry-state__stat">
+                    <span class="telemetry-state__stat-label">Update Rate</span>
+                    <span class="telemetry-state__stat-value">5 Hz</span>
+                  </div>
+                  <div class="telemetry-state__stat">
+                    <span class="telemetry-state__stat-label">Active Subscriptions</span>
+                    <span class="telemetry-state__stat-value">12</span>
+                  </div>
+                  <div class="telemetry-state__stat">
+                    <span class="telemetry-state__stat-label">Messages/sec</span>
+                    <span class="telemetry-state__stat-value">247</span>
+                  </div>
+                </div>
+              </div>
+              <div class="telemetry-state__timeline">
+                <div class="telemetry-state__timeline-bar">
+                  <div class="telemetry-state__timeline-progress"></div>
+                  <div class="telemetry-state__timeline-handle"></div>
+                </div>
+                <div class="telemetry-state__time-labels">
+                  <span>2026-01-12 08:00:00</span>
+                  <span>Current: 2026-01-12 14:45:32</span>
+                  <span>Now</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Graph Tile 1 -->
+        <div class="tile tile--graph">
+          <div class="tile__header">
+            <span class="tile__title">
+              <span class="material-icons tile__title-icon">show_chart</span>
+              Propulsion Temperature
+            </span>
+            <div class="tile__actions">
+              <button class="tile__action-btn"><span class="material-icons" style="font-size: 18px;">folder_open</span></button>
+              <button class="tile__action-btn"><span class="material-icons" style="font-size: 18px;">fullscreen</span></button>
+              <button class="tile__action-btn"><span class="material-icons" style="font-size: 18px;">more_vert</span></button>
+            </div>
+          </div>
+          <div class="tile__content">
+            <div class="graph-tile__chart-container">
+              <canvas id="propulsionChart"></canvas>
+            </div>
+          </div>
+        </div>
+
+        <!-- Graph Tile 2 -->
+        <div class="tile tile--graph">
+          <div class="tile__header">
+            <span class="tile__title">
+              <span class="material-icons tile__title-icon">show_chart</span>
+              Power System Output
+            </span>
+            <div class="tile__actions">
+              <button class="tile__action-btn"><span class="material-icons" style="font-size: 18px;">folder_open</span></button>
+              <button class="tile__action-btn"><span class="material-icons" style="font-size: 18px;">fullscreen</span></button>
+              <button class="tile__action-btn"><span class="material-icons" style="font-size: 18px;">more_vert</span></button>
+            </div>
+          </div>
+          <div class="tile__content">
+            <div class="graph-tile__chart-container">
+              <canvas id="powerChart"></canvas>
+            </div>
+          </div>
+        </div>
+
+        <!-- Tabular Tile 1 -->
+        <div class="tile tile--tabular">
+          <div class="tile__header">
+            <span class="tile__title">
+              <span class="material-icons tile__title-icon">table_chart</span>
+              Navigation System
+            </span>
+            <div class="tile__actions">
+              <button class="tile__action-btn"><span class="material-icons" style="font-size: 18px;">folder_open</span></button>
+              <button class="tile__action-btn"><span class="material-icons" style="font-size: 18px;">more_vert</span></button>
+            </div>
+          </div>
+          <div class="tile__content">
+            <table class="tabular-tile__table">
+              <thead>
+                <tr><th>Parameter</th><th>Value</th><th>Status</th><th>UST</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td>Altitude</td>
+                  <td class="tabular-tile__value--numeric">408.2 km</td>
+                  <td><span class="status-badge status-badge--normal">Normal</span></td>
+                  <td class="tabular-tile__timestamp">14:45:32.234</td>
+                </tr>
+                <tr>
+                  <td>Velocity</td>
+                  <td class="tabular-tile__value--numeric">7.66 km/s</td>
+                  <td><span class="status-badge status-badge--normal">Normal</span></td>
+                  <td class="tabular-tile__timestamp">14:45:32.234</td>
+                </tr>
+                <tr>
+                  <td>Inclination</td>
+                  <td class="tabular-tile__value--numeric">51.64°</td>
+                  <td><span class="status-badge status-badge--normal">Normal</span></td>
+                  <td class="tabular-tile__timestamp">14:45:32.234</td>
+                </tr>
+                <tr>
+                  <td>Orbital Period</td>
+                  <td class="tabular-tile__value--numeric">92.68 min</td>
+                  <td><span class="status-badge status-badge--normal">Normal</span></td>
+                  <td class="tabular-tile__timestamp">14:45:32.234</td>
+                </tr>
+                <tr>
+                  <td>GPS Lock</td>
+                  <td class="tabular-tile__value--numeric">Acquired</td>
+                  <td><span class="status-badge status-badge--normal">Normal</span></td>
+                  <td class="tabular-tile__timestamp">14:45:32.234</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        <!-- Tabular Tile 2 -->
+        <div class="tile tile--tabular">
+          <div class="tile__header">
+            <span class="tile__title">
+              <span class="material-icons tile__title-icon">table_chart</span>
+              Propulsion System
+            </span>
+            <div class="tile__actions">
+              <button class="tile__action-btn"><span class="material-icons" style="font-size: 18px;">folder_open</span></button>
+              <button class="tile__action-btn"><span class="material-icons" style="font-size: 18px;">more_vert</span></button>
+            </div>
+          </div>
+          <div class="tile__content">
+            <table class="tabular-tile__table">
+              <thead>
+                <tr><th>Parameter</th><th>Value</th><th>Status</th><th>UST</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td>Thrust Vector X</td>
+                  <td class="tabular-tile__value--numeric">0.0023</td>
+                  <td><span class="status-badge status-badge--normal">Normal</span></td>
+                  <td class="tabular-tile__timestamp">14:45:32.234</td>
+                </tr>
+                <tr>
+                  <td>Fuel Pressure</td>
+                  <td class="tabular-tile__value--numeric tabular-tile__value--warning">324.7 kPa</td>
+                  <td><span class="status-badge status-badge--warning">Warning</span></td>
+                  <td class="tabular-tile__timestamp">14:45:32.234</td>
+                </tr>
+                <tr>
+                  <td>Engine Temp</td>
+                  <td class="tabular-tile__value--numeric">892.3 K</td>
+                  <td><span class="status-badge status-badge--normal">Normal</span></td>
+                  <td class="tabular-tile__timestamp">14:45:32.234</td>
+                </tr>
+                <tr>
+                  <td>Oxidizer Flow</td>
+                  <td class="tabular-tile__value--numeric">12.4 kg/s</td>
+                  <td><span class="status-badge status-badge--normal">Normal</span></td>
+                  <td class="tabular-tile__timestamp">14:45:32.234</td>
+                </tr>
+                <tr>
+                  <td>Chamber Pressure</td>
+                  <td class="tabular-tile__value--numeric tabular-tile__value--critical">2.1 MPa</td>
+                  <td><span class="status-badge status-badge--critical">Critical</span></td>
+                  <td class="tabular-tile__timestamp">14:45:32.234</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </main>
+  </div>
+
+  <script>
+    const chartOptions = {
+      responsive: true,
+      maintainAspectRatio: false,
+      plugins: { legend: { display: false } },
+      scales: {
+        x: { grid: { color: 'rgba(255,255,255,0.1)' }, ticks: { color: 'rgba(255,255,255,0.6)' } },
+        y: { grid: { color: 'rgba(255,255,255,0.1)' }, ticks: { color: 'rgba(255,255,255,0.6)' } }
+      }
+    };
+
+    // Propulsion Chart - Primary color
+    new Chart(document.getElementById('propulsionChart'), {
+      type: 'line',
+      data: {
+        labels: Array.from({length: 20}, (_, i) => `${i * 3}s`),
+        datasets: [{
+          label: 'Temperature (K)',
+          data: [850, 855, 860, 872, 880, 892, 888, 875, 868, 860, 865, 878, 890, 895, 888, 876, 870, 868, 875, 882],
+          borderColor: '#bb86fc',
+          backgroundColor: 'rgba(187, 134, 252, 0.1)',
+          fill: true,
+          tension: 0.4
+        }]
+      },
+      options: { ...chartOptions, scales: { ...chartOptions.scales, y: { ...chartOptions.scales.y, min: 800, max: 950 } } }
+    });
+
+    // Power Chart - Secondary color
+    new Chart(document.getElementById('powerChart'), {
+      type: 'line',
+      data: {
+        labels: Array.from({length: 20}, (_, i) => `${i * 3}s`),
+        datasets: [{
+          label: 'Power (kW)',
+          data: [42, 45, 48, 52, 55, 58, 62, 65, 63, 60, 58, 55, 57, 59, 62, 64, 66, 68, 65, 63],
+          borderColor: '#03dac6',
+          backgroundColor: 'rgba(3, 218, 198, 0.1)',
+          fill: true,
+          tension: 0.4
+        }]
+      },
+      options: { ...chartOptions, scales: { ...chartOptions.scales, y: { ...chartOptions.scales.y, min: 30, max: 80 } } }
+    });
+  </script>
+</body>
+</html>

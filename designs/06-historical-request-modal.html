@@ -1,0 +1,201 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Event Monitoring - Historical Telemetry Request</title>
+  <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+  <style>
+    /* Angular Material Dark Theme Colors Only (REQ-UI-006)
+       Primary: #bb86fc
+       Secondary: #03dac6
+       Error: #cf6679
+       Surface: #1f1f1f
+       Background: #121212
+    */
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body { font-family: 'Roboto', sans-serif; background-color: #121212; color: #ffffff; min-height: 100vh; }
+
+    /* Modal Overlay */
+    .modal-overlay {
+      position: fixed; top: 0; left: 0; right: 0; bottom: 0;
+      background-color: rgba(0, 0, 0, 0.7);
+      display: flex; align-items: center; justify-content: center; z-index: 2000;
+    }
+
+    /* BEM: Modal Block */
+    .modal {
+      background-color: #1f1f1f; border-radius: 8px;
+      width: 90%; max-width: 600px;
+      display: flex; flex-direction: column;
+      box-shadow: 0 8px 32px rgba(0, 0, 0, 0.5);
+    }
+    .modal__header {
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 16px 24px; border-bottom: 1px solid #333;
+    }
+    .modal__title { font-size: 20px; font-weight: 500; display: flex; align-items: center; }
+    .modal__title-icon { color: #03dac6; margin-right: 12px; }
+    .modal__close-btn {
+      background: none; border: none; color: rgba(255, 255, 255, 0.6);
+      cursor: pointer; padding: 8px; border-radius: 50%;
+      display: flex; align-items: center; justify-content: center;
+    }
+    .modal__close-btn:hover { background-color: rgba(255, 255, 255, 0.1); color: #ffffff; }
+    .modal__content { padding: 24px; }
+    .modal__footer {
+      display: flex; justify-content: flex-end; gap: 12px;
+      padding: 16px 24px; border-top: 1px solid #333;
+    }
+
+    /* BEM: Info Box */
+    .info-box {
+      display: flex; align-items: flex-start; gap: 12px;
+      padding: 12px 16px; background-color: rgba(3, 218, 198, 0.1);
+      border: 1px solid rgba(3, 218, 198, 0.3);
+      border-radius: 4px; margin-bottom: 24px;
+    }
+    .info-box__icon { color: #03dac6; font-size: 20px; margin-top: 2px; }
+    .info-box__text { font-size: 13px; color: rgba(255, 255, 255, 0.87); line-height: 1.5; }
+
+    /* BEM: Form Group */
+    .form-group { margin-bottom: 20px; }
+    .form-group__label {
+      display: block; font-size: 12px; font-weight: 500;
+      color: rgba(255, 255, 255, 0.6); text-transform: uppercase;
+      letter-spacing: 0.5px; margin-bottom: 8px;
+    }
+    .form-group__input {
+      width: 100%; padding: 12px 16px;
+      background-color: #2a2a2a; border: 1px solid #333;
+      border-radius: 4px; color: #ffffff; font-size: 14px; outline: none;
+      transition: border-color 0.2s;
+    }
+    .form-group__input:focus { border-color: #03dac6; }
+
+    /* BEM: Datetime Row */
+    .datetime-row { display: flex; gap: 16px; }
+    .datetime-row .form-group { flex: 1; }
+
+    /* BEM: Quick Select */
+    .quick-select { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 20px; }
+    .quick-select__btn {
+      padding: 6px 12px; background-color: #2a2a2a;
+      border: 1px solid #333; border-radius: 16px;
+      color: rgba(255, 255, 255, 0.87); font-size: 12px;
+      cursor: pointer; transition: all 0.2s;
+    }
+    .quick-select__btn:hover { background-color: #333; border-color: #03dac6; }
+    .quick-select__btn--active { background-color: rgba(3, 218, 198, 0.2); border-color: #03dac6; color: #03dac6; }
+
+    /* BEM: Summary */
+    .summary { background-color: #2a2a2a; border-radius: 4px; padding: 16px; }
+    .summary__title {
+      font-size: 14px; font-weight: 500; color: #03dac6;
+      margin-bottom: 12px; display: flex; align-items: center; gap: 8px;
+    }
+    .summary__row {
+      display: flex; justify-content: space-between;
+      padding: 8px 0; border-bottom: 1px solid #333;
+    }
+    .summary__row:last-child { border-bottom: none; }
+    .summary__label { font-size: 13px; color: rgba(255, 255, 255, 0.6); }
+    .summary__value { font-size: 13px; color: #ffffff; font-weight: 500; }
+    .summary__value--highlight { color: #03dac6; }
+
+    /* BEM: Button */
+    .btn {
+      padding: 10px 24px; border-radius: 4px;
+      font-size: 14px; font-weight: 500; cursor: pointer;
+      display: flex; align-items: center; gap: 8px; transition: all 0.2s;
+    }
+    .btn--primary { background-color: #03dac6; color: #121212; border: none; }
+    .btn--primary:hover { background-color: #00c4b4; }
+    .btn--secondary { background-color: transparent; color: #03dac6; border: 1px solid #03dac6; }
+    .btn--secondary:hover { background-color: rgba(3, 218, 198, 0.1); }
+  </style>
+</head>
+<body>
+  <!-- Historical Telemetry Request Modal (REQ-TSTATE-003, REQ-TSTATE-004) -->
+  <div class="modal-overlay">
+    <div class="modal">
+      <div class="modal__header">
+        <h2 class="modal__title">
+          <span class="material-icons modal__title-icon">history</span>
+          Request Historical Telemetry
+        </h2>
+        <button class="modal__close-btn"><span class="material-icons">close</span></button>
+      </div>
+
+      <div class="modal__content">
+        <div class="info-box">
+          <span class="material-icons info-box__icon">info</span>
+          <span class="info-box__text">
+            Select a time range to retrieve historical telemetry data from the HistoricalTelemetry service.
+            Data will be loaded via paginated API requests (REQ-HIST-003, REQ-TSTATE-004) and can be replayed in review mode.
+          </span>
+        </div>
+
+        <div class="form-group">
+          <label class="form-group__label">Quick Select</label>
+          <div class="quick-select">
+            <button class="quick-select__btn">Last 1 hour</button>
+            <button class="quick-select__btn">Last 4 hours</button>
+            <button class="quick-select__btn quick-select__btn--active">Last 8 hours</button>
+            <button class="quick-select__btn">Last 24 hours</button>
+            <button class="quick-select__btn">Custom Range</button>
+          </div>
+        </div>
+
+        <div class="datetime-row">
+          <div class="form-group">
+            <label class="form-group__label">Start Date & Time</label>
+            <input type="datetime-local" class="form-group__input" value="2026-01-11T08:00">
+          </div>
+          <div class="form-group">
+            <label class="form-group__label">End Date & Time</label>
+            <input type="datetime-local" class="form-group__input" value="2026-01-11T16:00">
+          </div>
+        </div>
+
+        <!-- Request Summary (shows pagination info per REQ-HIST-003) -->
+        <div class="summary">
+          <div class="summary__title">
+            <span class="material-icons" style="font-size: 18px;">summarize</span>
+            Request Summary
+          </div>
+          <div class="summary__row">
+            <span class="summary__label">Time Range</span>
+            <span class="summary__value">8 hours</span>
+          </div>
+          <div class="summary__row">
+            <span class="summary__label">Active Subscriptions</span>
+            <span class="summary__value">12 metrics</span>
+          </div>
+          <div class="summary__row">
+            <span class="summary__label">Estimated Records</span>
+            <span class="summary__value summary__value--highlight">~144,000 records</span>
+          </div>
+          <div class="summary__row">
+            <span class="summary__label">Estimated Pages (100/page)</span>
+            <span class="summary__value">~1,440 pages</span>
+          </div>
+          <div class="summary__row">
+            <span class="summary__label">Estimated Load Time</span>
+            <span class="summary__value">~15 seconds</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="modal__footer">
+        <button class="btn btn--secondary">Cancel</button>
+        <button class="btn btn--primary">
+          <span class="material-icons" style="font-size: 18px;">download</span>
+          Load Historical Data
+        </button>
+      </div>
+    </div>
+  </div>
+</body>
+</html>

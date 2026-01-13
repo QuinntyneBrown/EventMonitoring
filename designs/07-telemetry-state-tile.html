@@ -1,0 +1,604 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Event Monitoring - Telemetry State Tile Component</title>
+  <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500&family=Roboto+Mono&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+  <style>
+    /* Angular Material Dark Theme Colors Only (REQ-UI-006)
+       Primary: #bb86fc
+       Secondary: #03dac6
+       Error: #cf6679
+       Surface: #1f1f1f
+       Background: #121212
+    */
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body {
+      font-family: 'Roboto', sans-serif;
+      background-color: #121212;
+      color: #ffffff;
+      min-height: 100vh;
+      padding: 32px;
+      display: flex;
+      flex-direction: column;
+      gap: 32px;
+    }
+
+    /* Page Title */
+    .page-title {
+      font-size: 24px;
+      font-weight: 400;
+      color: #bb86fc;
+      margin-bottom: 8px;
+    }
+    .page-subtitle {
+      font-size: 14px;
+      color: rgba(255, 255, 255, 0.6);
+    }
+
+    /* BEM: Tile Block */
+    .tile {
+      background-color: #1f1f1f;
+      border-radius: 8px;
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+    }
+    .tile__header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 12px 16px;
+      background-color: #2a2a2a;
+      border-bottom: 1px solid #333;
+    }
+    .tile__title {
+      font-size: 14px;
+      font-weight: 500;
+      color: rgba(255, 255, 255, 0.87);
+      display: flex;
+      align-items: center;
+    }
+    .tile__title-icon {
+      font-size: 18px;
+      margin-right: 8px;
+      color: #bb86fc;
+    }
+    .tile__actions {
+      display: flex;
+      gap: 4px;
+    }
+    .tile__action-btn {
+      background: none;
+      border: none;
+      color: rgba(255, 255, 255, 0.6);
+      cursor: pointer;
+      padding: 4px;
+      border-radius: 4px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .tile__action-btn:hover {
+      background-color: rgba(255, 255, 255, 0.1);
+      color: #ffffff;
+    }
+    .tile__content {
+      flex: 1;
+      padding: 16px;
+      display: flex;
+      flex-direction: column;
+    }
+
+    /* BEM: Telemetry State Block */
+    .telemetry-state {
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+    }
+
+    .telemetry-state__info-banner {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 10px 16px;
+      border-radius: 4px;
+    }
+    .telemetry-state__info-banner--live {
+      background-color: rgba(187, 134, 252, 0.1);
+      border: 1px solid rgba(187, 134, 252, 0.3);
+    }
+    .telemetry-state__info-banner--review {
+      background-color: rgba(3, 218, 198, 0.1);
+      border: 1px solid rgba(3, 218, 198, 0.3);
+    }
+    .telemetry-state__info-icon--live {
+      color: #bb86fc;
+    }
+    .telemetry-state__info-icon--review {
+      color: #03dac6;
+    }
+    .telemetry-state__info-text {
+      font-size: 13px;
+      color: rgba(255, 255, 255, 0.87);
+    }
+    .telemetry-state__info-text strong {
+      color: #bb86fc;
+    }
+    .telemetry-state__info-text--review strong {
+      color: #03dac6;
+    }
+
+    .telemetry-state__controls {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      flex-wrap: wrap;
+    }
+
+    /* Mode Toggle (REQ-TSTATE-001, REQ-TSTATE-005) */
+    .telemetry-state__mode-toggle {
+      display: flex;
+      background-color: #333;
+      border-radius: 4px;
+      overflow: hidden;
+    }
+    .telemetry-state__mode-btn {
+      padding: 8px 16px;
+      border: none;
+      background: none;
+      color: rgba(255, 255, 255, 0.6);
+      cursor: pointer;
+      font-size: 14px;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      transition: all 0.2s;
+    }
+    .telemetry-state__mode-btn:hover {
+      background-color: rgba(255, 255, 255, 0.1);
+    }
+    .telemetry-state__mode-btn--active-live {
+      background-color: #bb86fc;
+      color: #121212;
+    }
+    .telemetry-state__mode-btn--active-review {
+      background-color: #03dac6;
+      color: #121212;
+    }
+
+    /* Playback Controls (REQ-TSTATE-002, REQ-TSTATE-008) */
+    .telemetry-state__playback {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .telemetry-state__playback-btn {
+      background: none;
+      border: 1px solid #555;
+      color: #ffffff;
+      cursor: pointer;
+      padding: 8px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: all 0.2s;
+    }
+    .telemetry-state__playback-btn:hover {
+      background-color: rgba(255, 255, 255, 0.1);
+      border-color: #bb86fc;
+    }
+    .telemetry-state__playback-btn--primary-live {
+      background-color: #bb86fc;
+      border-color: #bb86fc;
+      color: #121212;
+    }
+    .telemetry-state__playback-btn--primary-review {
+      background-color: #03dac6;
+      border-color: #03dac6;
+      color: #121212;
+    }
+    .telemetry-state__playback-btn:disabled {
+      opacity: 0.4;
+      cursor: not-allowed;
+    }
+
+    /* Speed Control */
+    .telemetry-state__speed {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 6px 12px;
+      background-color: #333;
+      border-radius: 4px;
+    }
+    .telemetry-state__speed-label {
+      font-size: 12px;
+      color: rgba(255, 255, 255, 0.6);
+    }
+    .telemetry-state__speed-value {
+      font-size: 14px;
+      font-weight: 500;
+    }
+    .telemetry-state__speed-value--live {
+      color: #bb86fc;
+    }
+    .telemetry-state__speed-value--review {
+      color: #03dac6;
+    }
+    .telemetry-state__speed-controls {
+      display: flex;
+      gap: 4px;
+    }
+    .telemetry-state__speed-btn {
+      background: none;
+      border: none;
+      color: rgba(255, 255, 255, 0.6);
+      cursor: pointer;
+      padding: 2px;
+      border-radius: 2px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .telemetry-state__speed-btn:hover {
+      color: #ffffff;
+      background-color: rgba(255, 255, 255, 0.1);
+    }
+
+    /* Stats (REQ-STREAM-004 - 5Hz default) */
+    .telemetry-state__stats {
+      display: flex;
+      gap: 24px;
+      flex-wrap: wrap;
+      margin-left: auto;
+    }
+    .telemetry-state__stat {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+    .telemetry-state__stat-label {
+      font-size: 11px;
+      color: rgba(255, 255, 255, 0.5);
+      margin-bottom: 4px;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+    .telemetry-state__stat-value {
+      font-size: 18px;
+      font-weight: 500;
+      font-family: 'Roboto Mono', monospace;
+    }
+    .telemetry-state__stat-value--live {
+      color: #03dac6;
+    }
+    .telemetry-state__stat-value--review {
+      color: #03dac6;
+    }
+
+    /* Timeline / Scrubbing (REQ-TSTATE-007) */
+    .telemetry-state__timeline {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+    .telemetry-state__timeline-bar {
+      height: 12px;
+      background-color: #333;
+      border-radius: 6px;
+      position: relative;
+      cursor: pointer;
+    }
+    .telemetry-state__timeline-loaded {
+      position: absolute;
+      top: 0;
+      left: 0;
+      height: 100%;
+      border-radius: 6px;
+    }
+    .telemetry-state__timeline-loaded--live {
+      background-color: rgba(187, 134, 252, 0.2);
+      width: 100%;
+    }
+    .telemetry-state__timeline-loaded--review {
+      background-color: rgba(3, 218, 198, 0.3);
+      width: 100%;
+    }
+    .telemetry-state__timeline-progress {
+      position: absolute;
+      top: 0;
+      left: 0;
+      height: 100%;
+      border-radius: 6px;
+    }
+    .telemetry-state__timeline-progress--live {
+      background: linear-gradient(90deg, #bb86fc, #d4b8ff);
+      width: 78%;
+    }
+    .telemetry-state__timeline-progress--review {
+      background: linear-gradient(90deg, #03dac6, #64ffda);
+      width: 42%;
+    }
+    .telemetry-state__timeline-handle {
+      position: absolute;
+      top: 50%;
+      transform: translate(-50%, -50%);
+      width: 20px;
+      height: 20px;
+      background-color: #ffffff;
+      border-radius: 50%;
+      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+      cursor: grab;
+    }
+    .telemetry-state__timeline-handle--live {
+      left: 78%;
+      border: 2px solid #bb86fc;
+    }
+    .telemetry-state__timeline-handle--review {
+      left: 42%;
+      border: 2px solid #03dac6;
+    }
+    .telemetry-state__time-labels {
+      display: flex;
+      justify-content: space-between;
+      font-size: 12px;
+      color: rgba(255, 255, 255, 0.6);
+    }
+    .telemetry-state__current-time--live {
+      color: #bb86fc;
+      font-weight: 500;
+    }
+    .telemetry-state__current-time--review {
+      color: #03dac6;
+      font-weight: 500;
+    }
+
+    /* Historical Request Button (REQ-TSTATE-003) */
+    .telemetry-state__history-btn {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      padding: 8px 16px;
+      background-color: transparent;
+      border: 1px solid #03dac6;
+      border-radius: 4px;
+      color: #03dac6;
+      font-size: 13px;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+    .telemetry-state__history-btn:hover {
+      background-color: rgba(3, 218, 198, 0.1);
+    }
+
+    /* Section Label */
+    .section-label {
+      font-size: 12px;
+      font-weight: 500;
+      color: rgba(255, 255, 255, 0.4);
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      margin-bottom: 12px;
+      margin-top: 16px;
+    }
+  </style>
+</head>
+<body>
+  <div>
+    <h1 class="page-title">Telemetry State Tile Component</h1>
+    <p class="page-subtitle">Controls live/review mode, playback, and time scrubbing (REQ-TSTATE-001 to REQ-TSTATE-008)</p>
+  </div>
+
+  <!-- LIVE MODE STATE -->
+  <div class="section-label">Live Mode (REQ-TSTATE-001, REQ-TSTATE-002)</div>
+  <div class="tile">
+    <div class="tile__header">
+      <span class="tile__title">
+        <span class="material-icons tile__title-icon">timeline</span>
+        Telemetry State Control
+      </span>
+      <div class="tile__actions">
+        <button class="tile__action-btn">
+          <span class="material-icons" style="font-size: 18px;">history</span>
+        </button>
+        <button class="tile__action-btn">
+          <span class="material-icons" style="font-size: 18px;">settings</span>
+        </button>
+      </div>
+    </div>
+    <div class="tile__content">
+      <div class="telemetry-state">
+        <!-- Live Mode Banner -->
+        <div class="telemetry-state__info-banner telemetry-state__info-banner--live">
+          <span class="material-icons telemetry-state__info-icon--live">broadcast_on_personal</span>
+          <span class="telemetry-state__info-text">
+            Receiving <strong>live telemetry</strong> from TelemetryStreaming service via SignalR at <strong>5 Hz</strong>
+          </span>
+        </div>
+
+        <div class="telemetry-state__controls">
+          <!-- Mode Toggle -->
+          <div class="telemetry-state__mode-toggle">
+            <button class="telemetry-state__mode-btn telemetry-state__mode-btn--active-live">
+              <span class="material-icons" style="font-size: 16px;">broadcast_on_personal</span>
+              Live
+            </button>
+            <button class="telemetry-state__mode-btn">
+              <span class="material-icons" style="font-size: 16px;">history</span>
+              Review
+            </button>
+          </div>
+
+          <!-- Playback Controls (Pause Live - REQ-TSTATE-002) -->
+          <div class="telemetry-state__playback">
+            <button class="telemetry-state__playback-btn" disabled>
+              <span class="material-icons" style="font-size: 18px;">skip_previous</span>
+            </button>
+            <button class="telemetry-state__playback-btn telemetry-state__playback-btn--primary-live">
+              <span class="material-icons" style="font-size: 24px;">pause</span>
+            </button>
+            <button class="telemetry-state__playback-btn" disabled>
+              <span class="material-icons" style="font-size: 18px;">skip_next</span>
+            </button>
+          </div>
+
+          <!-- Request Historical Data Button (REQ-TSTATE-003) -->
+          <button class="telemetry-state__history-btn">
+            <span class="material-icons" style="font-size: 16px;">download</span>
+            Load Historical Data
+          </button>
+
+          <!-- Stats -->
+          <div class="telemetry-state__stats">
+            <div class="telemetry-state__stat">
+              <span class="telemetry-state__stat-label">Update Rate</span>
+              <span class="telemetry-state__stat-value telemetry-state__stat-value--live">5 Hz</span>
+            </div>
+            <div class="telemetry-state__stat">
+              <span class="telemetry-state__stat-label">Subscriptions</span>
+              <span class="telemetry-state__stat-value telemetry-state__stat-value--live">12</span>
+            </div>
+            <div class="telemetry-state__stat">
+              <span class="telemetry-state__stat-label">Msgs/sec</span>
+              <span class="telemetry-state__stat-value telemetry-state__stat-value--live">247</span>
+            </div>
+            <div class="telemetry-state__stat">
+              <span class="telemetry-state__stat-label">Connection</span>
+              <span class="telemetry-state__stat-value telemetry-state__stat-value--live">OK</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Timeline -->
+        <div class="telemetry-state__timeline">
+          <div class="telemetry-state__timeline-bar">
+            <div class="telemetry-state__timeline-loaded telemetry-state__timeline-loaded--live"></div>
+            <div class="telemetry-state__timeline-progress telemetry-state__timeline-progress--live"></div>
+            <div class="telemetry-state__timeline-handle telemetry-state__timeline-handle--live"></div>
+          </div>
+          <div class="telemetry-state__time-labels">
+            <span>2026-01-12 08:00:00</span>
+            <span class="telemetry-state__current-time--live">Current: 2026-01-12 14:52:18 UTC</span>
+            <span>Now (Live)</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- REVIEW MODE STATE -->
+  <div class="section-label">Review Mode with Time Scrubbing (REQ-TSTATE-005 to REQ-TSTATE-008)</div>
+  <div class="tile">
+    <div class="tile__header">
+      <span class="tile__title">
+        <span class="material-icons tile__title-icon">timeline</span>
+        Telemetry State Control - Historical Playback
+      </span>
+      <div class="tile__actions">
+        <button class="tile__action-btn">
+          <span class="material-icons" style="font-size: 18px;">history</span>
+        </button>
+        <button class="tile__action-btn">
+          <span class="material-icons" style="font-size: 18px;">settings</span>
+        </button>
+      </div>
+    </div>
+    <div class="tile__content">
+      <div class="telemetry-state">
+        <!-- Review Mode Banner (REQ-TSTATE-004) -->
+        <div class="telemetry-state__info-banner telemetry-state__info-banner--review">
+          <span class="material-icons telemetry-state__info-icon--review">history</span>
+          <span class="telemetry-state__info-text telemetry-state__info-text--review">
+            Viewing historical data from <strong>2026-01-11</strong>.
+            Loaded <strong>18,456</strong> records across <strong>12</strong> metrics (all pages retrieved).
+          </span>
+        </div>
+
+        <div class="telemetry-state__controls">
+          <!-- Mode Toggle -->
+          <div class="telemetry-state__mode-toggle">
+            <button class="telemetry-state__mode-btn">
+              <span class="material-icons" style="font-size: 16px;">broadcast_on_personal</span>
+              Live
+            </button>
+            <button class="telemetry-state__mode-btn telemetry-state__mode-btn--active-review">
+              <span class="material-icons" style="font-size: 16px;">history</span>
+              Review
+            </button>
+          </div>
+
+          <!-- Playback Controls (REQ-TSTATE-008) -->
+          <div class="telemetry-state__playback">
+            <button class="telemetry-state__playback-btn">
+              <span class="material-icons" style="font-size: 18px;">fast_rewind</span>
+            </button>
+            <button class="telemetry-state__playback-btn">
+              <span class="material-icons" style="font-size: 18px;">skip_previous</span>
+            </button>
+            <button class="telemetry-state__playback-btn telemetry-state__playback-btn--primary-review">
+              <span class="material-icons" style="font-size: 24px;">play_arrow</span>
+            </button>
+            <button class="telemetry-state__playback-btn">
+              <span class="material-icons" style="font-size: 18px;">skip_next</span>
+            </button>
+            <button class="telemetry-state__playback-btn">
+              <span class="material-icons" style="font-size: 18px;">fast_forward</span>
+            </button>
+          </div>
+
+          <!-- Playback Speed -->
+          <div class="telemetry-state__speed">
+            <span class="telemetry-state__speed-label">Speed:</span>
+            <div class="telemetry-state__speed-controls">
+              <button class="telemetry-state__speed-btn">
+                <span class="material-icons" style="font-size: 16px;">remove</span>
+              </button>
+            </div>
+            <span class="telemetry-state__speed-value telemetry-state__speed-value--review">2x</span>
+            <div class="telemetry-state__speed-controls">
+              <button class="telemetry-state__speed-btn">
+                <span class="material-icons" style="font-size: 16px;">add</span>
+              </button>
+            </div>
+          </div>
+
+          <!-- Stats -->
+          <div class="telemetry-state__stats">
+            <div class="telemetry-state__stat">
+              <span class="telemetry-state__stat-label">Duration</span>
+              <span class="telemetry-state__stat-value telemetry-state__stat-value--review">8h 24m</span>
+            </div>
+            <div class="telemetry-state__stat">
+              <span class="telemetry-state__stat-label">Records</span>
+              <span class="telemetry-state__stat-value telemetry-state__stat-value--review">18,456</span>
+            </div>
+            <div class="telemetry-state__stat">
+              <span class="telemetry-state__stat-label">Progress</span>
+              <span class="telemetry-state__stat-value telemetry-state__stat-value--review">42%</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Timeline with Scrubbing (REQ-TSTATE-007) -->
+        <div class="telemetry-state__timeline">
+          <div class="telemetry-state__timeline-bar">
+            <div class="telemetry-state__timeline-loaded telemetry-state__timeline-loaded--review"></div>
+            <div class="telemetry-state__timeline-progress telemetry-state__timeline-progress--review"></div>
+            <div class="telemetry-state__timeline-handle telemetry-state__timeline-handle--review"></div>
+          </div>
+          <div class="telemetry-state__time-labels">
+            <span>2026-01-11 08:00:00</span>
+            <span class="telemetry-state__current-time--review">Playback: 2026-01-11 11:32:18 UTC</span>
+            <span>2026-01-11 16:24:00</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</body>
+</html>

@@ -1,0 +1,373 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Event Monitoring - Main Layout</title>
+  <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+  <style>
+    /* Angular Material Dark Theme Colors Only (REQ-UI-006)
+       Primary: #bb86fc
+       Secondary: #03dac6
+       Error: #cf6679
+       Surface: #1f1f1f
+       Background: #121212
+    */
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: 'Roboto', sans-serif;
+      background-color: #121212;
+      color: #ffffff;
+      min-height: 100vh;
+    }
+
+    /* BEM: Main Layout Block */
+    .main-layout {
+      display: flex;
+      flex-direction: column;
+      min-height: 100vh;
+    }
+
+    /* BEM: Header Block */
+    .header {
+      background-color: #1f1f1f;
+      height: 64px;
+      display: flex;
+      align-items: center;
+      padding: 0 16px;
+      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      z-index: 1000;
+    }
+
+    .header__menu-btn {
+      background: none;
+      border: none;
+      color: #ffffff;
+      cursor: pointer;
+      padding: 8px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .header__menu-btn:hover {
+      background-color: rgba(255, 255, 255, 0.1);
+    }
+
+    .header__logo {
+      display: flex;
+      align-items: center;
+      margin-left: 16px;
+    }
+
+    .header__logo-icon {
+      color: #bb86fc; /* Primary */
+      margin-right: 8px;
+    }
+
+    .header__title {
+      font-size: 20px;
+      font-weight: 500;
+      color: #ffffff;
+    }
+
+    .header__spacer {
+      flex: 1;
+    }
+
+    .header__mode-indicator {
+      display: flex;
+      align-items: center;
+      padding: 6px 16px;
+      border-radius: 16px;
+      font-size: 14px;
+      font-weight: 500;
+      margin-right: 16px;
+    }
+
+    .header__mode-indicator--live {
+      background-color: rgba(187, 134, 252, 0.2); /* Primary */
+      color: #bb86fc;
+    }
+
+    .header__mode-indicator--review {
+      background-color: rgba(3, 218, 198, 0.2); /* Secondary */
+      color: #03dac6;
+    }
+
+    .header__mode-dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      margin-right: 8px;
+      animation: pulse 2s infinite;
+    }
+
+    .header__mode-dot--live {
+      background-color: #bb86fc; /* Primary */
+    }
+
+    @keyframes pulse {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0.5; }
+    }
+
+    .header__actions {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .header__btn {
+      background: none;
+      border: none;
+      color: #ffffff;
+      cursor: pointer;
+      padding: 8px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .header__btn:hover {
+      background-color: rgba(255, 255, 255, 0.1);
+    }
+
+    .header__edit-toggle {
+      display: flex;
+      align-items: center;
+      padding: 6px 12px;
+      border-radius: 4px;
+      background-color: transparent;
+      border: 1px solid #bb86fc; /* Primary */
+      color: #bb86fc;
+      cursor: pointer;
+      font-size: 14px;
+      margin-right: 8px;
+    }
+
+    .header__edit-toggle:hover {
+      background-color: rgba(187, 134, 252, 0.1);
+    }
+
+    /* BEM: Sidenav Block */
+    .sidenav {
+      width: 256px;
+      background-color: #1f1f1f;
+      position: fixed;
+      top: 64px;
+      left: 0;
+      bottom: 0;
+      padding-top: 8px;
+      border-right: 1px solid #333;
+    }
+
+    .sidenav__section {
+      padding: 8px 0;
+    }
+
+    .sidenav__section-title {
+      padding: 8px 16px;
+      font-size: 12px;
+      font-weight: 500;
+      color: rgba(255, 255, 255, 0.6);
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    .sidenav__item {
+      display: flex;
+      align-items: center;
+      padding: 12px 16px;
+      color: rgba(255, 255, 255, 0.87);
+      text-decoration: none;
+      cursor: pointer;
+      transition: background-color 0.2s;
+    }
+
+    .sidenav__item:hover {
+      background-color: rgba(255, 255, 255, 0.05);
+    }
+
+    .sidenav__item--active {
+      background-color: rgba(187, 134, 252, 0.15); /* Primary */
+      color: #bb86fc;
+    }
+
+    .sidenav__item-icon {
+      margin-right: 16px;
+      opacity: 0.7;
+    }
+
+    .sidenav__item--active .sidenav__item-icon {
+      opacity: 1;
+      color: #bb86fc; /* Primary */
+    }
+
+    .sidenav__divider {
+      height: 1px;
+      background-color: #333;
+      margin: 8px 0;
+    }
+
+    /* BEM: Content Block */
+    .content {
+      margin-left: 256px;
+      margin-top: 64px;
+      padding: 24px;
+      min-height: calc(100vh - 64px);
+      background-color: #121212;
+    }
+
+    .content__header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 24px;
+    }
+
+    .content__title {
+      font-size: 24px;
+      font-weight: 400;
+      color: #ffffff;
+    }
+
+    .content__subtitle {
+      font-size: 14px;
+      color: rgba(255, 255, 255, 0.6);
+      margin-top: 4px;
+    }
+
+    /* Placeholder */
+    .placeholder {
+      background-color: #1f1f1f;
+      border-radius: 8px;
+      padding: 48px;
+      text-align: center;
+      border: 1px dashed #333;
+    }
+
+    .placeholder__icon {
+      font-size: 64px;
+      color: rgba(255, 255, 255, 0.3);
+      margin-bottom: 16px;
+    }
+
+    .placeholder__text {
+      font-size: 16px;
+      color: rgba(255, 255, 255, 0.5);
+    }
+  </style>
+</head>
+<body>
+  <div class="main-layout">
+    <!-- Header -->
+    <header class="header">
+      <button class="header__menu-btn">
+        <span class="material-icons">menu</span>
+      </button>
+      <div class="header__logo">
+        <span class="material-icons header__logo-icon">satellite_alt</span>
+        <span class="header__title">Event Monitoring System</span>
+      </div>
+      <div class="header__spacer"></div>
+
+      <div class="header__mode-indicator header__mode-indicator--live">
+        <span class="header__mode-dot header__mode-dot--live"></span>
+        LIVE MODE
+      </div>
+
+      <button class="header__edit-toggle">
+        <span class="material-icons" style="font-size: 18px; margin-right: 4px;">edit</span>
+        Edit Mode
+      </button>
+
+      <div class="header__actions">
+        <button class="header__btn">
+          <span class="material-icons">notifications</span>
+        </button>
+        <button class="header__btn">
+          <span class="material-icons">settings</span>
+        </button>
+        <button class="header__btn">
+          <span class="material-icons">account_circle</span>
+        </button>
+      </div>
+    </header>
+
+    <!-- Sidenav -->
+    <nav class="sidenav">
+      <div class="sidenav__section">
+        <div class="sidenav__section-title">Main</div>
+        <a class="sidenav__item sidenav__item--active">
+          <span class="material-icons sidenav__item-icon">dashboard</span>
+          Dashboard
+        </a>
+        <a class="sidenav__item">
+          <span class="material-icons sidenav__item-icon">show_chart</span>
+          Telemetry
+        </a>
+        <a class="sidenav__item">
+          <span class="material-icons sidenav__item-icon">history</span>
+          Historical Data
+        </a>
+      </div>
+
+      <div class="sidenav__divider"></div>
+
+      <div class="sidenav__section">
+        <div class="sidenav__section-title">Configuration</div>
+        <a class="sidenav__item">
+          <span class="material-icons sidenav__item-icon">folder</span>
+          Config Files
+        </a>
+        <a class="sidenav__item">
+          <span class="material-icons sidenav__item-icon">tune</span>
+          Settings
+        </a>
+      </div>
+
+      <div class="sidenav__divider"></div>
+
+      <div class="sidenav__section">
+        <div class="sidenav__section-title">System</div>
+        <a class="sidenav__item">
+          <span class="material-icons sidenav__item-icon">monitor_heart</span>
+          Health Status
+        </a>
+        <a class="sidenav__item">
+          <span class="material-icons sidenav__item-icon">help_outline</span>
+          Help
+        </a>
+      </div>
+    </nav>
+
+    <!-- Main Content -->
+    <main class="content">
+      <div class="content__header">
+        <div>
+          <h1 class="content__title">Dashboard</h1>
+          <p class="content__subtitle">Real-time space vehicle telemetry monitoring</p>
+        </div>
+      </div>
+
+      <div class="placeholder">
+        <span class="material-icons placeholder__icon">widgets</span>
+        <p class="placeholder__text">Dashboard tiles will be displayed here</p>
+      </div>
+    </main>
+  </div>
+</body>
+</html>

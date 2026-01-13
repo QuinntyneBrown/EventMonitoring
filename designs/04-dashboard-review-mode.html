@@ -1,0 +1,422 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Event Monitoring - Dashboard (Review Mode)</title>
+  <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500&family=Roboto+Mono&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <style>
+    /* Angular Material Dark Theme Colors Only (REQ-UI-006)
+       Primary: #bb86fc
+       Secondary: #03dac6
+       Error: #cf6679
+       Surface: #1f1f1f
+       Background: #121212
+    */
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body { font-family: 'Roboto', sans-serif; background-color: #121212; color: #ffffff; min-height: 100vh; }
+    .main-layout { display: flex; flex-direction: column; min-height: 100vh; }
+
+    /* Header */
+    .header {
+      background-color: #1f1f1f; height: 64px;
+      display: flex; align-items: center; padding: 0 16px;
+      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+      position: fixed; top: 0; left: 0; right: 0; z-index: 1000;
+    }
+    .header__menu-btn {
+      background: none; border: none; color: #ffffff; cursor: pointer;
+      padding: 8px; border-radius: 50%; display: flex; align-items: center; justify-content: center;
+    }
+    .header__logo { display: flex; align-items: center; margin-left: 16px; }
+    .header__logo-icon { color: #bb86fc; margin-right: 8px; }
+    .header__title { font-size: 20px; font-weight: 500; }
+    .header__spacer { flex: 1; }
+    .header__mode-indicator {
+      display: flex; align-items: center;
+      padding: 6px 16px; border-radius: 16px;
+      font-size: 14px; font-weight: 500; margin-right: 16px;
+    }
+    .header__mode-indicator--review { background-color: rgba(3, 218, 198, 0.2); color: #03dac6; }
+    .header__mode-dot { width: 8px; height: 8px; border-radius: 50%; margin-right: 8px; background-color: #03dac6; }
+    .header__actions { display: flex; align-items: center; gap: 8px; }
+    .header__btn {
+      background: none; border: none; color: #ffffff; cursor: pointer;
+      padding: 8px; border-radius: 50%; display: flex; align-items: center; justify-content: center;
+    }
+    .header__edit-toggle {
+      display: flex; align-items: center;
+      padding: 6px 12px; border-radius: 4px;
+      background-color: transparent; border: 1px solid #bb86fc;
+      color: #bb86fc; cursor: pointer; font-size: 14px; margin-right: 8px;
+    }
+
+    /* Sidenav */
+    .sidenav {
+      width: 256px; background-color: #1f1f1f;
+      position: fixed; top: 64px; left: 0; bottom: 0;
+      padding-top: 8px; border-right: 1px solid #333;
+    }
+    .sidenav__section { padding: 8px 0; }
+    .sidenav__section-title {
+      padding: 8px 16px; font-size: 12px; font-weight: 500;
+      color: rgba(255, 255, 255, 0.6); text-transform: uppercase; letter-spacing: 0.5px;
+    }
+    .sidenav__item {
+      display: flex; align-items: center;
+      padding: 12px 16px; color: rgba(255, 255, 255, 0.87);
+      text-decoration: none; cursor: pointer; transition: background-color 0.2s;
+    }
+    .sidenav__item:hover { background-color: rgba(255, 255, 255, 0.05); }
+    .sidenav__item--active { background-color: rgba(187, 134, 252, 0.15); color: #bb86fc; }
+    .sidenav__item-icon { margin-right: 16px; opacity: 0.7; }
+    .sidenav__item--active .sidenav__item-icon { opacity: 1; color: #bb86fc; }
+    .sidenav__divider { height: 1px; background-color: #333; margin: 8px 0; }
+
+    /* Content */
+    .content {
+      margin-left: 256px; margin-top: 64px; padding: 16px;
+      min-height: calc(100vh - 64px); background-color: #121212;
+    }
+
+    /* Dashboard Grid */
+    .dashboard-grid {
+      display: grid; grid-template-columns: repeat(12, 1fr);
+      grid-auto-rows: minmax(60px, auto); gap: 16px;
+    }
+
+    /* Tile */
+    .tile {
+      background-color: #1f1f1f; border-radius: 8px; overflow: hidden;
+      display: flex; flex-direction: column; box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+    }
+    .tile__header {
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 12px 16px; background-color: #2a2a2a; border-bottom: 1px solid #333;
+    }
+    .tile__title { font-size: 14px; font-weight: 500; color: rgba(255, 255, 255, 0.87); display: flex; align-items: center; }
+    .tile__title-icon { font-size: 18px; margin-right: 8px; color: #bb86fc; }
+    .tile__actions { display: flex; gap: 4px; }
+    .tile__action-btn {
+      background: none; border: none; color: rgba(255, 255, 255, 0.6);
+      cursor: pointer; padding: 4px; border-radius: 4px;
+      display: flex; align-items: center; justify-content: center;
+    }
+    .tile__action-btn:hover { background-color: rgba(255, 255, 255, 0.1); color: #ffffff; }
+    .tile__content { flex: 1; padding: 16px; display: flex; flex-direction: column; }
+
+    /* Telemetry State Tile - Review Mode */
+    .tile--telemetry-state { grid-column: span 12; grid-row: span 2; }
+    .telemetry-state { display: flex; flex-direction: column; gap: 16px; }
+    .telemetry-state__controls { display: flex; align-items: center; gap: 16px; flex-wrap: wrap; }
+    .telemetry-state__mode-toggle { display: flex; background-color: #333; border-radius: 4px; overflow: hidden; }
+    .telemetry-state__mode-btn {
+      padding: 8px 16px; border: none; background: none;
+      color: rgba(255, 255, 255, 0.6); cursor: pointer; font-size: 14px;
+      display: flex; align-items: center; gap: 4px;
+    }
+    .telemetry-state__mode-btn--active { background-color: #03dac6; color: #121212; }
+    .telemetry-state__playback { display: flex; align-items: center; gap: 8px; }
+    .telemetry-state__playback-btn {
+      background: none; border: 1px solid #555; color: #ffffff;
+      cursor: pointer; padding: 8px; border-radius: 50%;
+      display: flex; align-items: center; justify-content: center;
+    }
+    .telemetry-state__playback-btn:hover { background-color: rgba(255, 255, 255, 0.1); border-color: #03dac6; }
+    .telemetry-state__playback-btn--primary { background-color: #03dac6; border-color: #03dac6; color: #121212; }
+    .telemetry-state__speed { display: flex; align-items: center; gap: 8px; padding: 4px 12px; background-color: #333; border-radius: 4px; }
+    .telemetry-state__speed-label { font-size: 12px; color: rgba(255, 255, 255, 0.6); }
+    .telemetry-state__speed-value { font-size: 14px; font-weight: 500; color: #03dac6; }
+    .telemetry-state__timeline { flex: 1; display: flex; flex-direction: column; gap: 8px; }
+    .telemetry-state__timeline-bar {
+      height: 12px; background-color: #333; border-radius: 6px;
+      position: relative; cursor: pointer;
+    }
+    .telemetry-state__timeline-loaded { height: 100%; background-color: rgba(3, 218, 198, 0.3); border-radius: 6px; width: 100%; }
+    .telemetry-state__timeline-progress {
+      position: absolute; top: 0; left: 0;
+      height: 100%; background: linear-gradient(90deg, #03dac6, #64ffda);
+      border-radius: 6px; width: 42%;
+    }
+    .telemetry-state__timeline-handle {
+      position: absolute; top: 50%; left: 42%;
+      transform: translate(-50%, -50%);
+      width: 20px; height: 20px; background-color: #ffffff;
+      border-radius: 50%; box-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+      cursor: grab; border: 2px solid #03dac6;
+    }
+    .telemetry-state__time-labels {
+      display: flex; justify-content: space-between;
+      font-size: 12px; color: rgba(255, 255, 255, 0.6);
+    }
+    .telemetry-state__current-time { color: #03dac6; font-weight: 500; }
+    .telemetry-state__stats { display: flex; gap: 24px; flex-wrap: wrap; }
+    .telemetry-state__stat { display: flex; flex-direction: column; }
+    .telemetry-state__stat-label { font-size: 12px; color: rgba(255, 255, 255, 0.6); margin-bottom: 4px; }
+    .telemetry-state__stat-value { font-size: 16px; font-weight: 500; color: #03dac6; }
+    .telemetry-state__info-banner {
+      display: flex; align-items: center; gap: 12px;
+      padding: 10px 16px; background-color: rgba(3, 218, 198, 0.1);
+      border: 1px solid rgba(3, 218, 198, 0.3); border-radius: 4px;
+    }
+    .telemetry-state__info-icon { color: #03dac6; }
+    .telemetry-state__info-text { font-size: 13px; color: rgba(255, 255, 255, 0.87); }
+    .telemetry-state__info-text strong { color: #03dac6; }
+
+    /* Graph Tile */
+    .tile--graph { grid-column: span 6; grid-row: span 4; }
+    .graph-tile__chart-container { flex: 1; position: relative; min-height: 200px; }
+
+    /* Tabular Tile */
+    .tile--tabular { grid-column: span 12; grid-row: span 3; }
+    .tabular-tile__table { width: 100%; border-collapse: collapse; font-size: 13px; }
+    .tabular-tile__table th {
+      text-align: left; padding: 8px 12px; background-color: #2a2a2a;
+      color: rgba(255, 255, 255, 0.87); font-weight: 500; border-bottom: 1px solid #333;
+    }
+    .tabular-tile__table td {
+      padding: 8px 12px; border-bottom: 1px solid #333; color: rgba(255, 255, 255, 0.87);
+    }
+    .tabular-tile__value--numeric { font-family: 'Roboto Mono', monospace; color: #03dac6; }
+    .tabular-tile__timestamp { color: rgba(255, 255, 255, 0.5); font-size: 11px; }
+    .status-badge { display: inline-flex; align-items: center; padding: 2px 8px; border-radius: 12px; font-size: 11px; font-weight: 500; }
+    .status-badge--normal { background-color: rgba(3, 218, 198, 0.2); color: #03dac6; }
+    .status-badge--warning { background-color: rgba(207, 102, 121, 0.2); color: #cf6679; }
+  </style>
+</head>
+<body>
+  <div class="main-layout">
+    <!-- Header -->
+    <header class="header">
+      <button class="header__menu-btn"><span class="material-icons">menu</span></button>
+      <div class="header__logo">
+        <span class="material-icons header__logo-icon">satellite_alt</span>
+        <span class="header__title">Event Monitoring System</span>
+      </div>
+      <div class="header__spacer"></div>
+      <div class="header__mode-indicator header__mode-indicator--review">
+        <span class="header__mode-dot"></span>
+        REVIEW MODE
+      </div>
+      <button class="header__edit-toggle">
+        <span class="material-icons" style="font-size: 18px; margin-right: 4px;">edit</span>
+        Edit Mode
+      </button>
+      <div class="header__actions">
+        <button class="header__btn"><span class="material-icons">notifications</span></button>
+        <button class="header__btn"><span class="material-icons">settings</span></button>
+        <button class="header__btn"><span class="material-icons">account_circle</span></button>
+      </div>
+    </header>
+
+    <!-- Sidenav -->
+    <nav class="sidenav">
+      <div class="sidenav__section">
+        <div class="sidenav__section-title">Main</div>
+        <a class="sidenav__item sidenav__item--active">
+          <span class="material-icons sidenav__item-icon">dashboard</span>Dashboard
+        </a>
+        <a class="sidenav__item"><span class="material-icons sidenav__item-icon">show_chart</span>Telemetry</a>
+        <a class="sidenav__item"><span class="material-icons sidenav__item-icon">history</span>Historical Data</a>
+      </div>
+      <div class="sidenav__divider"></div>
+      <div class="sidenav__section">
+        <div class="sidenav__section-title">Configuration</div>
+        <a class="sidenav__item"><span class="material-icons sidenav__item-icon">folder</span>Config Files</a>
+        <a class="sidenav__item"><span class="material-icons sidenav__item-icon">tune</span>Settings</a>
+      </div>
+    </nav>
+
+    <!-- Main Content -->
+    <main class="content">
+      <div class="dashboard-grid">
+        <!-- Telemetry State Tile - Review Mode (REQ-TSTATE-005 to REQ-TSTATE-008) -->
+        <div class="tile tile--telemetry-state">
+          <div class="tile__header">
+            <span class="tile__title">
+              <span class="material-icons tile__title-icon">timeline</span>
+              Telemetry State Control - Historical Playback
+            </span>
+            <div class="tile__actions">
+              <button class="tile__action-btn"><span class="material-icons" style="font-size: 18px;">settings</span></button>
+            </div>
+          </div>
+          <div class="tile__content">
+            <div class="telemetry-state">
+              <div class="telemetry-state__info-banner">
+                <span class="material-icons telemetry-state__info-icon">info</span>
+                <span class="telemetry-state__info-text">
+                  Viewing historical data from <strong>2026-01-11</strong>.
+                  Loaded <strong>18,456</strong> records across <strong>12</strong> metrics.
+                </span>
+              </div>
+              <div class="telemetry-state__controls">
+                <div class="telemetry-state__mode-toggle">
+                  <button class="telemetry-state__mode-btn">
+                    <span class="material-icons" style="font-size: 16px;">broadcast_on_personal</span>Live
+                  </button>
+                  <button class="telemetry-state__mode-btn telemetry-state__mode-btn--active">
+                    <span class="material-icons" style="font-size: 16px;">history</span>Review
+                  </button>
+                </div>
+                <div class="telemetry-state__playback">
+                  <button class="telemetry-state__playback-btn"><span class="material-icons" style="font-size: 18px;">fast_rewind</span></button>
+                  <button class="telemetry-state__playback-btn"><span class="material-icons" style="font-size: 18px;">skip_previous</span></button>
+                  <button class="telemetry-state__playback-btn telemetry-state__playback-btn--primary">
+                    <span class="material-icons" style="font-size: 24px;">play_arrow</span>
+                  </button>
+                  <button class="telemetry-state__playback-btn"><span class="material-icons" style="font-size: 18px;">skip_next</span></button>
+                  <button class="telemetry-state__playback-btn"><span class="material-icons" style="font-size: 18px;">fast_forward</span></button>
+                </div>
+                <div class="telemetry-state__speed">
+                  <span class="telemetry-state__speed-label">Speed:</span>
+                  <span class="telemetry-state__speed-value">2x</span>
+                </div>
+                <div class="telemetry-state__stats">
+                  <div class="telemetry-state__stat">
+                    <span class="telemetry-state__stat-label">Duration</span>
+                    <span class="telemetry-state__stat-value">8h 24m</span>
+                  </div>
+                  <div class="telemetry-state__stat">
+                    <span class="telemetry-state__stat-label">Records</span>
+                    <span class="telemetry-state__stat-value">18,456</span>
+                  </div>
+                </div>
+              </div>
+              <!-- Time Scrubbing (REQ-TSTATE-007) -->
+              <div class="telemetry-state__timeline">
+                <div class="telemetry-state__timeline-bar">
+                  <div class="telemetry-state__timeline-loaded"></div>
+                  <div class="telemetry-state__timeline-progress"></div>
+                  <div class="telemetry-state__timeline-handle"></div>
+                </div>
+                <div class="telemetry-state__time-labels">
+                  <span>2026-01-11 08:00:00</span>
+                  <span class="telemetry-state__current-time">Current: 2026-01-11 11:32:18</span>
+                  <span>2026-01-11 16:24:00</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Graph Tiles showing historical data (REQ-TSTATE-006) -->
+        <div class="tile tile--graph">
+          <div class="tile__header">
+            <span class="tile__title">
+              <span class="material-icons tile__title-icon">show_chart</span>
+              Propulsion Temp (Historical)
+            </span>
+            <div class="tile__actions">
+              <button class="tile__action-btn"><span class="material-icons" style="font-size: 18px;">folder_open</span></button>
+              <button class="tile__action-btn"><span class="material-icons" style="font-size: 18px;">fullscreen</span></button>
+            </div>
+          </div>
+          <div class="tile__content">
+            <div class="graph-tile__chart-container"><canvas id="propChart"></canvas></div>
+          </div>
+        </div>
+
+        <div class="tile tile--graph">
+          <div class="tile__header">
+            <span class="tile__title">
+              <span class="material-icons tile__title-icon">show_chart</span>
+              Power Output (Historical)
+            </span>
+            <div class="tile__actions">
+              <button class="tile__action-btn"><span class="material-icons" style="font-size: 18px;">folder_open</span></button>
+              <button class="tile__action-btn"><span class="material-icons" style="font-size: 18px;">fullscreen</span></button>
+            </div>
+          </div>
+          <div class="tile__content">
+            <div class="graph-tile__chart-container"><canvas id="powerChart"></canvas></div>
+          </div>
+        </div>
+
+        <!-- Tabular showing historical data -->
+        <div class="tile tile--tabular">
+          <div class="tile__header">
+            <span class="tile__title">
+              <span class="material-icons tile__title-icon">table_chart</span>
+              Navigation System (Historical @ 2026-01-11 11:32:18)
+            </span>
+            <div class="tile__actions">
+              <button class="tile__action-btn"><span class="material-icons" style="font-size: 18px;">folder_open</span></button>
+            </div>
+          </div>
+          <div class="tile__content">
+            <table class="tabular-tile__table">
+              <thead><tr><th>Parameter</th><th>Value</th><th>Status</th><th>UST</th></tr></thead>
+              <tbody>
+                <tr>
+                  <td>Altitude</td>
+                  <td class="tabular-tile__value--numeric">407.8 km</td>
+                  <td><span class="status-badge status-badge--normal">Normal</span></td>
+                  <td class="tabular-tile__timestamp">2026-01-11 11:32:18.456</td>
+                </tr>
+                <tr>
+                  <td>Velocity</td>
+                  <td class="tabular-tile__value--numeric">7.65 km/s</td>
+                  <td><span class="status-badge status-badge--normal">Normal</span></td>
+                  <td class="tabular-tile__timestamp">2026-01-11 11:32:18.456</td>
+                </tr>
+                <tr>
+                  <td>Fuel Pressure</td>
+                  <td class="tabular-tile__value--numeric">318.4 kPa</td>
+                  <td><span class="status-badge status-badge--warning">Warning</span></td>
+                  <td class="tabular-tile__timestamp">2026-01-11 11:32:18.456</td>
+                </tr>
+                <tr>
+                  <td>Engine Temp</td>
+                  <td class="tabular-tile__value--numeric">865.2 K</td>
+                  <td><span class="status-badge status-badge--normal">Normal</span></td>
+                  <td class="tabular-tile__timestamp">2026-01-11 11:32:18.456</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </main>
+  </div>
+
+  <script>
+    const chartOptions = {
+      responsive: true, maintainAspectRatio: false,
+      plugins: { legend: { display: false } },
+      scales: {
+        x: { grid: { color: 'rgba(255,255,255,0.1)' }, ticks: { color: 'rgba(255,255,255,0.6)' } },
+        y: { grid: { color: 'rgba(255,255,255,0.1)' }, ticks: { color: 'rgba(255,255,255,0.6)' } }
+      }
+    };
+
+    new Chart(document.getElementById('propChart'), {
+      type: 'line',
+      data: {
+        labels: ['08:00', '09:00', '10:00', '11:00', '11:32'],
+        datasets: [{
+          data: [845, 862, 878, 870, 865],
+          borderColor: '#03dac6', backgroundColor: 'rgba(3, 218, 198, 0.1)',
+          fill: true, tension: 0.4, pointRadius: 4
+        }]
+      },
+      options: { ...chartOptions, scales: { ...chartOptions.scales, y: { ...chartOptions.scales.y, min: 800, max: 920 } } }
+    });
+
+    new Chart(document.getElementById('powerChart'), {
+      type: 'line',
+      data: {
+        labels: ['08:00', '09:00', '10:00', '11:00', '11:32'],
+        datasets: [{
+          data: [48, 52, 58, 55, 54],
+          borderColor: '#03dac6', backgroundColor: 'rgba(3, 218, 198, 0.1)',
+          fill: true, tension: 0.4, pointRadius: 4
+        }]
+      },
+      options: { ...chartOptions, scales: { ...chartOptions.scales, y: { ...chartOptions.scales.y, min: 40, max: 70 } } }
+    });
+  </script>
+</body>
+</html>

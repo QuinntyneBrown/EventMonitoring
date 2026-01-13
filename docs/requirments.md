@@ -469,23 +469,45 @@ And manual subscriptions shall only be used when necessary
 ## 7. Frontend - UI Framework and Styling
 
 ### REQ-UI-001: Angular Material
-All HTML elements shall use Angular Material components.
+The frontend shall use Angular Material theming and Angular Material components for all UI elements.
+
+Exceptions:
+- Charts shall be implemented using Chart.js.
 
 **Acceptance Criteria:**
 ```gherkin
 Given UI components are implemented
 When HTML elements are rendered
-Then Angular Material components shall be used
+Then Angular Material components shall be used for UI elements
+And Chart.js shall be used for charts
 ```
 
 ### REQ-UI-002: Dark Theme
-The application shall use a dark theme.
+The application shall use an Angular Material dark theme.
 
 **Acceptance Criteria:**
 ```gherkin
 Given the application is loaded
 When the UI is displayed
-Then a dark theme shall be applied
+Then an Angular Material dark theme shall be applied
+```
+
+### REQ-UI-006: Theme Color Restriction
+The application shall only use colors defined in the Angular Material theme. No custom colors shall be added outside of the theme color palette.
+
+**Acceptance Criteria:**
+```gherkin
+Given UI components are styled
+When examining color values in stylesheets
+Then only Angular Material theme colors shall be used
+And no custom colors (such as orange) shall be defined outside the theme
+And the following theme colors shall be available:
+  | Role      | Color   |
+  | Primary   | #bb86fc |
+  | Secondary | #03dac6 |
+  | Error     | #cf6679 |
+  | Surface   | #1f1f1f |
+  | Background| #121212 |
 ```
 
 ### REQ-UI-005: BEM Naming Convention
@@ -500,7 +522,7 @@ And class names shall be structured as block__element--modifier when applicable
 ```
 
 ### REQ-UI-003: Gridstack.js for Dashboard Tiles
-The dashboard shall use Gridstack.js for tile management.
+The dashboard grid framework shall be Gridstack.js and shall be used for tile management.
 
 **Acceptance Criteria:**
 ```gherkin
@@ -512,11 +534,17 @@ Then Gridstack.js shall manage tile layout and interactions
 ### REQ-UI-004: Chart.js for Graphs
 Chart.js shall be used for displaying graphs in graph tile components.
 
+Line charts shall use a smooth (flowing) interpolation mode.
+
 **Acceptance Criteria:**
 ```gherkin
 Given a graph tile component displays telemetry
 When the graph is rendered
 Then Chart.js shall be used for visualization
+
+Given a line chart is rendered
+When line chart options are configured
+Then the line shall be rendered using a smooth (flowing) interpolation mode
 ```
 
 ---
