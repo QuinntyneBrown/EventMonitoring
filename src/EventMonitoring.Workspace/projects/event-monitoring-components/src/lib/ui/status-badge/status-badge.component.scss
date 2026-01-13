@@ -1,0 +1,24 @@
+.status-badge {
+  display: inline-flex;
+  align-items: center;
+  padding: 2px var(--em-spacing-sm);
+  border-radius: var(--em-radius-lg);
+  font-size: var(--em-font-size-xs);
+  font-weight: var(--em-font-weight-medium);
+  text-transform: capitalize;
+
+  &--normal {
+    background-color: var(--em-color-secondary-20);
+    color: var(--em-color-secondary);
+  }
+
+  &--warning {
+    background-color: var(--em-color-error-20);
+    color: var(--em-color-error);
+  }
+
+  &--critical {
+    background-color: var(--em-color-error-30);
+    color: var(--em-color-error);
+  }
+}

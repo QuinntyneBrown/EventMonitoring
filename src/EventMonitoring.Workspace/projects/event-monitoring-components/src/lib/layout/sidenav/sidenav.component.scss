@@ -1,0 +1,60 @@
+.sidenav {
+  width: 256px;
+  background-color: var(--em-color-surface);
+  position: fixed;
+  top: 64px;
+  left: 0;
+  bottom: 0;
+  padding-top: var(--em-spacing-sm);
+  border-right: 1px solid var(--em-color-border);
+  overflow-y: auto;
+
+  &__section {
+    padding: var(--em-spacing-sm) 0;
+  }
+
+  &__section-title {
+    padding: var(--em-spacing-sm) var(--em-spacing-md);
+    font-size: var(--em-font-size-xs);
+    font-weight: 500;
+    color: var(--em-color-text-low);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+  }
+
+  &__item {
+    display: flex;
+    align-items: center;
+    padding: 12px var(--em-spacing-md);
+    color: var(--em-color-text-medium);
+    text-decoration: none;
+    cursor: pointer;
+    transition: var(--em-transition-fast);
+
+    &:hover {
+      background-color: rgba(255, 255, 255, 0.05);
+    }
+
+    &--active {
+      background-color: rgba(187, 134, 252, 0.15);
+      color: var(--em-color-primary);
+
+      .sidenav__item-icon {
+        opacity: 1;
+        color: var(--em-color-primary);
+      }
+    }
+  }
+
+  &__item-icon {
+    margin-right: var(--em-spacing-md);
+    opacity: 0.7;
+    font-size: 24px;
+  }
+
+  &__divider {
+    height: 1px;
+    background-color: var(--em-color-border);
+    margin: var(--em-spacing-sm) 0;
+  }
+}

@@ -1,0 +1,58 @@
+.info-box {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  padding: 12px var(--em-spacing-md);
+  border-radius: var(--em-radius-sm);
+
+  &--info {
+    background-color: var(--em-color-primary-10);
+    border: 1px solid var(--em-color-primary-30);
+
+    .info-box__icon {
+      color: var(--em-color-primary);
+    }
+  }
+
+  &--live {
+    background-color: var(--em-color-primary-10);
+    border: 1px solid var(--em-color-primary-30);
+
+    .info-box__icon {
+      color: var(--em-color-primary);
+    }
+  }
+
+  &--review {
+    background-color: var(--em-color-secondary-10);
+    border: 1px solid var(--em-color-secondary-30);
+
+    .info-box__icon {
+      color: var(--em-color-secondary);
+    }
+  }
+
+  &__icon {
+    font-size: 20px;
+    margin-top: 2px;
+    flex-shrink: 0;
+  }
+
+  &__text {
+    font-size: 13px;
+    color: var(--em-color-text-high);
+    line-height: 1.5;
+
+    :host ::ng-deep strong {
+      font-weight: var(--em-font-weight-medium);
+    }
+  }
+
+  &--live &__text :host ::ng-deep strong {
+    color: var(--em-color-primary);
+  }
+
+  &--review &__text :host ::ng-deep strong {
+    color: var(--em-color-secondary);
+  }
+}

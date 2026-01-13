@@ -1,0 +1,11 @@
+<button
+  [ngClass]="buttonClasses"
+  [type]="type"
+  [disabled]="disabled"
+  [attr.aria-disabled]="disabled"
+  (click)="onClick()"
+>
+  <span *ngIf="icon" class="btn__icon material-icons">{{ icon }}</span>
+  <span *ngIf="label" class="btn__label">{{ label }}</span>
+  <ng-content></ng-content>
+</button>

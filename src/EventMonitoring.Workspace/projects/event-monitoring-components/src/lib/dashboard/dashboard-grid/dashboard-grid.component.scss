@@ -1,0 +1,59 @@
+.dashboard-grid {
+  display: grid;
+  grid-template-columns: repeat(12, 1fr);
+  grid-auto-rows: minmax(60px, auto);
+  gap: var(--em-spacing-md);
+  min-height: 200px;
+
+  &--edit-mode {
+    background-image: radial-gradient(
+      circle,
+      var(--em-color-text-disabled) 1px,
+      transparent 1px
+    );
+    background-size: 20px 20px;
+    padding: var(--em-spacing-sm);
+    border-radius: var(--em-radius-md);
+  }
+
+  // When Gridstack is loaded, let it handle the layout
+  &:not(.dashboard-grid--no-gridstack) {
+    display: block;
+
+    :host ::ng-deep {
+      .grid-stack {
+        background: transparent;
+      }
+
+      .grid-stack-item {
+        &.ui-draggable-dragging {
+          z-index: 100;
+        }
+      }
+
+      .grid-stack-item-content {
+        background: transparent;
+        overflow: visible;
+      }
+
+      .grid-stack-placeholder {
+        background-color: rgba(187, 134, 252, 0.2);
+        border: 2px dashed var(--em-color-primary);
+        border-radius: var(--em-radius-md);
+      }
+    }
+  }
+}
+
+// Fallback CSS Grid when Gridstack is not loaded
+.dashboard-grid--no-gridstack {
+  :host ::ng-deep {
+    em-tile,
+    em-tile-placeholder {
+      .tile,
+      .tile-placeholder {
+        height: 100%;
+      }
+    }
+  }
+}

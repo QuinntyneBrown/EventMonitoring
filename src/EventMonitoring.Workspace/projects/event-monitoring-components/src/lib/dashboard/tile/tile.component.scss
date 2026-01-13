@@ -1,0 +1,96 @@
+.tile {
+  background-color: var(--em-color-surface);
+  border-radius: var(--em-radius-md);
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+  position: relative;
+
+  &--edit-mode {
+    border: 2px dashed var(--em-color-primary);
+    cursor: move;
+
+    .tile__edit-controls {
+      display: flex;
+    }
+  }
+
+  &--graph {
+    grid-column: span 6;
+    grid-row: span 4;
+  }
+
+  &--tabular {
+    grid-column: span 6;
+    grid-row: span 4;
+  }
+
+  &--telemetry-state {
+    grid-column: span 12;
+    grid-row: span 2;
+  }
+
+  &__edit-controls {
+    display: none;
+    position: absolute;
+    top: var(--em-spacing-sm);
+    right: var(--em-spacing-sm);
+    gap: 4px;
+    z-index: 10;
+  }
+
+  &__drag-handle {
+    background-color: var(--em-color-primary);
+    border: none;
+    color: var(--em-color-background);
+    cursor: grab;
+    padding: 4px;
+    border-radius: var(--em-radius-sm);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: var(--em-transition-fast);
+
+    .material-icons {
+      font-size: 18px;
+    }
+
+    &:hover {
+      background-color: rgba(187, 134, 252, 0.8);
+    }
+
+    &:active {
+      cursor: grabbing;
+    }
+  }
+
+  &__remove-btn {
+    background-color: var(--em-color-error);
+    border: none;
+    color: white;
+    cursor: pointer;
+    padding: 4px;
+    border-radius: var(--em-radius-sm);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: var(--em-transition-fast);
+
+    .material-icons {
+      font-size: 18px;
+    }
+
+    &:hover {
+      background-color: rgba(207, 102, 121, 0.8);
+    }
+  }
+
+  &__content {
+    flex: 1;
+    padding: var(--em-spacing-md);
+    display: flex;
+    flex-direction: column;
+    overflow: auto;
+  }
+}

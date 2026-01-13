@@ -1,0 +1,20 @@
+<nav class="sidenav">
+  @for (section of sections; track section.title; let last = $last) {
+    <div class="sidenav__section">
+      <div class="sidenav__section-title">{{ section.title }}</div>
+      @for (item of section.items; track item.id) {
+        <a
+          class="sidenav__item"
+          [class.sidenav__item--active]="isActive(item)"
+          (click)="onItemClick(item)"
+        >
+          <span class="material-icons sidenav__item-icon">{{ item.icon }}</span>
+          {{ item.label }}
+        </a>
+      }
+    </div>
+    @if (!last) {
+      <div class="sidenav__divider"></div>
+    }
+  }
+</nav>

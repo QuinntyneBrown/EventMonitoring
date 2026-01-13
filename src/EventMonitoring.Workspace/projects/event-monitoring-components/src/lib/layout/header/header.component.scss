@@ -1,0 +1,108 @@
+.header {
+  background-color: var(--em-color-surface);
+  height: 64px;
+  display: flex;
+  align-items: center;
+  padding: 0 var(--em-spacing-md);
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: 1000;
+
+  &__menu-btn {
+    background: none;
+    border: none;
+    color: var(--em-color-text-high);
+    cursor: pointer;
+    padding: var(--em-spacing-sm);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: var(--em-transition-fast);
+
+    &:hover {
+      background-color: rgba(255, 255, 255, 0.1);
+    }
+  }
+
+  &__logo {
+    display: flex;
+    align-items: center;
+    margin-left: var(--em-spacing-md);
+  }
+
+  &__logo-icon {
+    color: var(--em-color-primary);
+    margin-right: var(--em-spacing-sm);
+    font-size: 28px;
+  }
+
+  &__title {
+    font-size: var(--em-font-size-lg);
+    font-weight: 500;
+    color: var(--em-color-text-high);
+  }
+
+  &__spacer {
+    flex: 1;
+  }
+
+  &__edit-toggle {
+    display: flex;
+    align-items: center;
+    padding: 6px 12px;
+    border-radius: var(--em-radius-sm);
+    background-color: transparent;
+    border: 1px solid var(--em-color-primary);
+    color: var(--em-color-primary);
+    cursor: pointer;
+    font-size: var(--em-font-size-sm);
+    margin-right: var(--em-spacing-sm);
+    margin-left: var(--em-spacing-md);
+    transition: var(--em-transition-fast);
+
+    &:hover {
+      background-color: rgba(187, 134, 252, 0.1);
+    }
+
+    &--active {
+      background-color: var(--em-color-primary);
+      color: var(--em-color-background);
+
+      &:hover {
+        background-color: rgba(187, 134, 252, 0.8);
+      }
+    }
+  }
+
+  &__edit-icon {
+    font-size: 18px;
+    margin-right: 4px;
+  }
+
+  &__actions {
+    display: flex;
+    align-items: center;
+    gap: var(--em-spacing-sm);
+  }
+
+  &__btn {
+    background: none;
+    border: none;
+    color: var(--em-color-text-high);
+    cursor: pointer;
+    padding: var(--em-spacing-sm);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: var(--em-transition-fast);
+
+    &:hover {
+      background-color: rgba(255, 255, 255, 0.1);
+    }
+  }
+}

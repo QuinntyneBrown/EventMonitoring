@@ -1,0 +1,25 @@
+<div class="main-layout" [class.main-layout--sidenav-collapsed]="sidenavCollapsed">
+  <em-header
+    [title]="title"
+    [logoIcon]="logoIcon"
+    [mode]="mode"
+    [showEditToggle]="showEditToggle"
+    [editModeActive]="editModeActive"
+    [actions]="headerActions"
+    (menuClick)="onMenuClick()"
+    (editToggle)="onEditToggle()"
+    (actionClick)="onHeaderActionClick($event)"
+  ></em-header>
+
+  @if (!sidenavCollapsed) {
+    <em-sidenav
+      [sections]="sidenavSections"
+      [activeItemId]="activeNavItemId"
+      (itemClick)="onNavItemClick($event)"
+    ></em-sidenav>
+  }
+
+  <em-content [class.content--full-width]="sidenavCollapsed">
+    <ng-content></ng-content>
+  </em-content>
+</div>

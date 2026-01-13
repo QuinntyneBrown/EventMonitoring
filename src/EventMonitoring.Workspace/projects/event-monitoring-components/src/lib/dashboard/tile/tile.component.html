@@ -1,0 +1,31 @@
+<div
+  class="tile"
+  [class.tile--edit-mode]="editMode"
+  [class.tile--graph]="type === 'graph'"
+  [class.tile--tabular]="type === 'tabular'"
+  [class.tile--telemetry-state]="type === 'telemetry-state'"
+  [style.grid-column]="gridColumn"
+  [style.grid-row]="gridRow"
+>
+  @if (editMode) {
+    <div class="tile__edit-controls">
+      <button class="tile__drag-handle" (mousedown)="onDragHandleMouseDown()">
+        <span class="material-icons">drag_indicator</span>
+      </button>
+      <button class="tile__remove-btn" (click)="onRemove()">
+        <span class="material-icons">close</span>
+      </button>
+    </div>
+  }
+
+  <em-tile-header
+    [title]="title"
+    [icon]="icon"
+    [actions]="actions"
+    (actionClick)="onActionClick($event)"
+  ></em-tile-header>
+
+  <div class="tile__content">
+    <ng-content></ng-content>
+  </div>
+</div>

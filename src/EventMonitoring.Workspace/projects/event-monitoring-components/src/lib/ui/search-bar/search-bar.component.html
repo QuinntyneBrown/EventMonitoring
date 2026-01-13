@@ -1,0 +1,12 @@
+<div class="search-bar" [class.search-bar--disabled]="disabled">
+  <span class="search-bar__icon material-icons">{{ icon }}</span>
+  <input
+    type="text"
+    class="search-bar__input"
+    [placeholder]="placeholder"
+    [value]="value"
+    [disabled]="disabled"
+    (input)="onInputChange($event)"
+    (blur)="onBlur()"
+  />
+</div>

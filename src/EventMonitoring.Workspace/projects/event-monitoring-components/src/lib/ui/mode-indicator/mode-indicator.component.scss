@@ -1,0 +1,51 @@
+.mode-indicator {
+  display: inline-flex;
+  align-items: center;
+  padding: 6px var(--em-spacing-md);
+  border-radius: var(--em-radius-lg);
+  font-size: var(--em-font-size-base);
+  font-weight: var(--em-font-weight-medium);
+
+  &--live {
+    background-color: var(--em-color-primary-20);
+    color: var(--em-color-primary);
+
+    .mode-indicator__dot {
+      background-color: var(--em-color-primary);
+    }
+  }
+
+  &--review {
+    background-color: var(--em-color-secondary-20);
+    color: var(--em-color-secondary);
+
+    .mode-indicator__dot {
+      background-color: var(--em-color-secondary);
+    }
+  }
+
+  &__dot {
+    width: 8px;
+    height: 8px;
+    border-radius: var(--em-radius-full);
+    margin-right: var(--em-spacing-sm);
+
+    &--pulse {
+      animation: pulse 2s infinite;
+    }
+  }
+
+  &__label {
+    letter-spacing: 0.5px;
+  }
+}
+
+@keyframes pulse {
+  0%,
+  100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.5;
+  }
+}

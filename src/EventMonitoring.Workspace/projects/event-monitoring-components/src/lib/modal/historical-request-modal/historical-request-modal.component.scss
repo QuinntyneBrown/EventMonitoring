@@ -1,0 +1,121 @@
+.form-group {
+  margin-bottom: var(--em-spacing-lg);
+
+  &__label {
+    display: block;
+    font-size: var(--em-font-size-xs);
+    font-weight: 500;
+    color: var(--em-color-text-low);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    margin-bottom: var(--em-spacing-sm);
+  }
+
+  &__input {
+    width: 100%;
+    padding: 12px var(--em-spacing-md);
+    background-color: var(--em-color-surface-variant);
+    border: 1px solid var(--em-color-border);
+    border-radius: var(--em-radius-sm);
+    color: var(--em-color-text-high);
+    font-size: var(--em-font-size-sm);
+    font-family: var(--em-font-family-base);
+    outline: none;
+    transition: var(--em-transition-fast);
+
+    &:focus {
+      border-color: var(--em-color-secondary);
+    }
+
+    &::-webkit-calendar-picker-indicator {
+      filter: invert(1);
+    }
+  }
+}
+
+.datetime-row {
+  display: flex;
+  gap: var(--em-spacing-md);
+
+  .form-group {
+    flex: 1;
+  }
+}
+
+.quick-select {
+  display: flex;
+  gap: var(--em-spacing-sm);
+  flex-wrap: wrap;
+
+  &__btn {
+    padding: 6px 12px;
+    background-color: var(--em-color-surface-variant);
+    border: 1px solid var(--em-color-border);
+    border-radius: var(--em-radius-full);
+    color: var(--em-color-text-medium);
+    font-size: var(--em-font-size-xs);
+    cursor: pointer;
+    transition: var(--em-transition-fast);
+
+    &:hover {
+      background-color: #333;
+      border-color: var(--em-color-secondary);
+    }
+
+    &--active {
+      background-color: rgba(3, 218, 198, 0.2);
+      border-color: var(--em-color-secondary);
+      color: var(--em-color-secondary);
+    }
+  }
+}
+
+.summary {
+  background-color: var(--em-color-surface-variant);
+  border-radius: var(--em-radius-sm);
+  padding: var(--em-spacing-md);
+
+  &__title {
+    font-size: var(--em-font-size-sm);
+    font-weight: 500;
+    color: var(--em-color-secondary);
+    margin-bottom: 12px;
+    display: flex;
+    align-items: center;
+    gap: var(--em-spacing-sm);
+
+    .material-icons {
+      font-size: 18px;
+    }
+  }
+
+  &__row {
+    display: flex;
+    justify-content: space-between;
+    padding: var(--em-spacing-sm) 0;
+    border-bottom: 1px solid var(--em-color-border);
+
+    &:last-child {
+      border-bottom: none;
+    }
+  }
+
+  &__label {
+    font-size: 13px;
+    color: var(--em-color-text-low);
+  }
+
+  &__value {
+    font-size: 13px;
+    color: var(--em-color-text-high);
+    font-weight: 500;
+
+    &--highlight {
+      color: var(--em-color-secondary);
+    }
+  }
+}
+
+em-info-box {
+  margin-bottom: var(--em-spacing-lg);
+}

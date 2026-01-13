@@ -1,0 +1,164 @@
+<em-tile
+  title="Telemetry State Control"
+  icon="timeline"
+  type="telemetry-state"
+  [editMode]="editMode"
+  [actions]="actions"
+  (actionClick)="onActionClick($event)"
+>
+  <div class="telemetry-state">
+    <!-- Info Banner -->
+    <em-info-box [variant]="infoVariant">
+      {{ infoBannerText }}
+    </em-info-box>
+
+    <div class="telemetry-state__controls">
+      <!-- Mode Toggle -->
+      <div class="telemetry-state__mode-toggle">
+        <button
+          class="telemetry-state__mode-btn"
+          [class.telemetry-state__mode-btn--active-live]="mode === 'live'"
+          (click)="onModeChange('live')"
+        >
+          <span class="material-icons">broadcast_on_personal</span>
+          Live
+        </button>
+        <button
+          class="telemetry-state__mode-btn"
+          [class.telemetry-state__mode-btn--active-review]="mode === 'review'"
+          (click)="onModeChange('review')"
+        >
+          <span class="material-icons">history</span>
+          Review
+        </button>
+      </div>
+
+      <!-- Playback Controls -->
+      <div class="telemetry-state__playback">
+        @if (mode === 'review') {
+          <button class="telemetry-state__playback-btn" (click)="onFastRewind()">
+            <span class="material-icons">fast_rewind</span>
+          </button>
+        }
+        <button
+          class="telemetry-state__playback-btn"
+          [disabled]="mode === 'live'"
+          (click)="onSkipPrevious()"
+        >
+          <span class="material-icons">skip_previous</span>
+        </button>
+        <button
+          class="telemetry-state__playback-btn telemetry-state__playback-btn--primary"
+          [class.telemetry-state__playback-btn--primary-live]="mode === 'live'"
+          [class.telemetry-state__playback-btn--primary-review]="mode === 'review'"
+          (click)="onPlayPause()"
+        >
+          <span class="material-icons">{{ playPauseIcon }}</span>
+        </button>
+        <button
+          class="telemetry-state__playback-btn"
+          [disabled]="mode === 'live'"
+          (click)="onSkipNext()"
+        >
+          <span class="material-icons">skip_next</span>
+        </button>
+        @if (mode === 'review') {
+          <button class="telemetry-state__playback-btn" (click)="onFastForward()">
+            <span class="material-icons">fast_forward</span>
+          </button>
+        }
+      </div>
+
+      <!-- Speed Control (Review mode only) -->
+      @if (mode === 'review') {
+        <div class="telemetry-state__speed">
+          <span class="telemetry-state__speed-label">Speed:</span>
+          <button class="telemetry-state__speed-btn" (click)="onSpeedDecrease()">
+            <span class="material-icons">remove</span>
+          </button>
+          <span class="telemetry-state__speed-value">{{ playbackSpeed }}x</span>
+          <button class="telemetry-state__speed-btn" (click)="onSpeedIncrease()">
+            <span class="material-icons">add</span>
+          </button>
+        </div>
+      }
+
+      <!-- Load Historical Data Button (Live mode) -->
+      @if (mode === 'live') {
+        <button class="telemetry-state__history-btn" (click)="onLoadHistoricalData()">
+          <span class="material-icons">download</span>
+          Load Historical Data
+        </button>
+      }
+
+      <!-- Stats -->
+      <div class="telemetry-state__stats">
+        @if (mode === 'live') {
+          <div class="telemetry-state__stat">
+            <span class="telemetry-state__stat-label">Update Rate</span>
+            <span class="telemetry-state__stat-value">{{ stats.updateRate }}</span>
+          </div>
+          <div class="telemetry-state__stat">
+            <span class="telemetry-state__stat-label">Subscriptions</span>
+            <span class="telemetry-state__stat-value">{{ stats.subscriptions }}</span>
+          </div>
+          <div class="telemetry-state__stat">
+            <span class="telemetry-state__stat-label">Msgs/sec</span>
+            <span class="telemetry-state__stat-value">{{ stats.messagesPerSecond }}</span>
+          </div>
+          <div class="telemetry-state__stat">
+            <span class="telemetry-state__stat-label">Connection</span>
+            <span class="telemetry-state__stat-value">{{ stats.connectionStatus }}</span>
+          </div>
+        } @else {
+          <div class="telemetry-state__stat">
+            <span class="telemetry-state__stat-label">Duration</span>
+            <span class="telemetry-state__stat-value">{{ stats.duration || 'N/A' }}</span>
+          </div>
+          <div class="telemetry-state__stat">
+            <span class="telemetry-state__stat-label">Records</span>
+            <span class="telemetry-state__stat-value">{{ stats.totalRecords?.toLocaleString() || 0 }}</span>
+          </div>
+          <div class="telemetry-state__stat">
+            <span class="telemetry-state__stat-label">Progress</span>
+            <span class="telemetry-state__stat-value">{{ stats.progress || 0 }}%</span>
+          </div>
+        }
+      </div>
+    </div>
+
+    <!-- Timeline -->
+    <div class="telemetry-state__timeline">
+      <div class="telemetry-state__timeline-bar" (click)="onTimelineClick($event)">
+        <div
+          class="telemetry-state__timeline-loaded"
+          [class.telemetry-state__timeline-loaded--live]="mode === 'live'"
+          [class.telemetry-state__timeline-loaded--review]="mode === 'review'"
+        ></div>
+        <div
+          class="telemetry-state__timeline-progress"
+          [class.telemetry-state__timeline-progress--live]="mode === 'live'"
+          [class.telemetry-state__timeline-progress--review]="mode === 'review'"
+          [style.width.%]="timeline.progress"
+        ></div>
+        <div
+          class="telemetry-state__timeline-handle"
+          [class.telemetry-state__timeline-handle--live]="mode === 'live'"
+          [class.telemetry-state__timeline-handle--review]="mode === 'review'"
+          [style.left.%]="timeline.progress"
+        ></div>
+      </div>
+      <div class="telemetry-state__time-labels">
+        <span>{{ timeline.startTime }}</span>
+        <span
+          class="telemetry-state__current-time"
+          [class.telemetry-state__current-time--live]="mode === 'live'"
+          [class.telemetry-state__current-time--review]="mode === 'review'"
+        >
+          {{ mode === 'live' ? 'Current:' : 'Playback:' }} {{ timeline.currentTime }}
+        </span>
+        <span>{{ timeline.endTime }}</span>
+      </div>
+    </div>
+  </div>
+</em-tile>

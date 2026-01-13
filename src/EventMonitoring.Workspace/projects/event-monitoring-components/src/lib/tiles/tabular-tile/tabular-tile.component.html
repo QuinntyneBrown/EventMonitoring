@@ -1,0 +1,44 @@
+<em-tile
+  [title]="title"
+  [icon]="icon"
+  type="tabular"
+  [editMode]="editMode"
+  [actions]="actions"
+  (actionClick)="onActionClick($event)"
+>
+  <table class="tabular-tile__table">
+    <thead>
+      <tr>
+        <th>Parameter</th>
+        <th>Value</th>
+        <th>Status</th>
+        @if (showTimestamp) {
+          <th>UST</th>
+        }
+      </tr>
+    </thead>
+    <tbody>
+      @for (row of rows; track row.id) {
+        <tr (click)="onRowClick(row)">
+          <td>{{ row.parameter }}</td>
+          <td class="tabular-tile__value--numeric" [ngClass]="getValueClass(row.status)">
+            {{ formatValue(row) }}
+          </td>
+          <td>
+            <em-status-badge [status]="row.status"></em-status-badge>
+          </td>
+          @if (showTimestamp) {
+            <td class="tabular-tile__timestamp">{{ row.timestamp }}</td>
+          }
+        </tr>
+      }
+      @if (rows.length === 0) {
+        <tr>
+          <td [attr.colspan]="showTimestamp ? 4 : 3" class="tabular-tile__empty">
+            No data available
+          </td>
+        </tr>
+      }
+    </tbody>
+  </table>
+</em-tile>

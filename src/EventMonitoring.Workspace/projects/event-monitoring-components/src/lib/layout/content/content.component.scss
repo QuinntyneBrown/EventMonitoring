@@ -1,0 +1,26 @@
+.content {
+  margin-left: 256px;
+  margin-top: 64px;
+  padding: var(--em-spacing-md);
+  min-height: calc(100vh - 64px);
+  background-color: var(--em-color-background);
+
+  &__header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: var(--em-spacing-lg);
+  }
+
+  &__title {
+    font-size: 24px;
+    font-weight: 400;
+    color: var(--em-color-text-high);
+  }
+
+  &__subtitle {
+    font-size: var(--em-font-size-sm);
+    color: var(--em-color-text-low);
+    margin-top: 4px;
+  }
+}

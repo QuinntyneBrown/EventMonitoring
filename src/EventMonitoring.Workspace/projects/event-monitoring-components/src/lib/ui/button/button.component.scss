@@ -1,0 +1,82 @@
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--em-spacing-sm);
+  padding: var(--em-spacing-sm) var(--em-spacing-md);
+  border-radius: var(--em-radius-sm);
+  font-family: var(--em-font-family-base);
+  font-size: var(--em-font-size-base);
+  font-weight: var(--em-font-weight-medium);
+  cursor: pointer;
+  transition: var(--em-transition-fast);
+  border: none;
+  outline: none;
+
+  &__icon {
+    font-size: 18px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  &__label {
+    white-space: nowrap;
+  }
+
+  // Primary variant
+  &--primary {
+    background-color: var(--em-color-primary);
+    color: var(--em-color-text-on-primary);
+
+    &:hover:not(.btn--disabled) {
+      background-color: var(--em-color-primary-variant);
+    }
+
+    &:focus-visible {
+      box-shadow: 0 0 0 2px var(--em-color-background), 0 0 0 4px var(--em-color-primary);
+    }
+  }
+
+  // Secondary variant
+  &--secondary {
+    background-color: transparent;
+    color: var(--em-color-primary);
+    border: 1px solid var(--em-color-primary);
+
+    &:hover:not(.btn--disabled) {
+      background-color: var(--em-color-primary-10);
+    }
+
+    &:focus-visible {
+      box-shadow: 0 0 0 2px var(--em-color-background), 0 0 0 4px var(--em-color-primary);
+    }
+  }
+
+  // Icon variant
+  &--icon {
+    padding: var(--em-spacing-sm);
+    border-radius: var(--em-radius-full);
+    background-color: transparent;
+    color: var(--em-color-text-high);
+    border: none;
+
+    &:hover:not(.btn--disabled) {
+      background-color: var(--em-color-hover);
+    }
+
+    &:focus-visible {
+      box-shadow: 0 0 0 2px var(--em-color-primary);
+    }
+
+    .btn__icon {
+      margin: 0;
+    }
+  }
+
+  // Disabled state
+  &--disabled {
+    opacity: 0.4;
+    cursor: not-allowed;
+  }
+}

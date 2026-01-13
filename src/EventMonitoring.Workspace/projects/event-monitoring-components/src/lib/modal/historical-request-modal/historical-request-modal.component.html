@@ -1,0 +1,90 @@
+<em-modal-overlay
+  [isOpen]="isOpen"
+  title="Request Historical Telemetry"
+  icon="history"
+  iconColor="secondary"
+  size="medium"
+  (closed)="onClose()"
+>
+  <em-info-box variant="info">
+    Select a time range to retrieve historical telemetry data from the HistoricalTelemetry service.
+    Data will be loaded via paginated API requests and can be replayed in review mode.
+  </em-info-box>
+
+  <div class="form-group">
+    <label class="form-group__label">Quick Select</label>
+    <div class="quick-select">
+      @for (range of timeRanges; track range.hours) {
+        <button
+          class="quick-select__btn"
+          [class.quick-select__btn--active]="isRangeSelected(range)"
+          (click)="onQuickSelect(range)"
+        >
+          {{ range.label }}
+        </button>
+      }
+      <button
+        class="quick-select__btn"
+        [class.quick-select__btn--active]="selectedTimeRange === null"
+        (click)="onCustomRange()"
+      >
+        Custom Range
+      </button>
+    </div>
+  </div>
+
+  <div class="datetime-row">
+    <div class="form-group">
+      <label class="form-group__label">Start Date & Time</label>
+      <input
+        type="datetime-local"
+        class="form-group__input"
+        [(ngModel)]="startDateTime"
+        (change)="onCustomRange()"
+      />
+    </div>
+    <div class="form-group">
+      <label class="form-group__label">End Date & Time</label>
+      <input
+        type="datetime-local"
+        class="form-group__input"
+        [(ngModel)]="endDateTime"
+        (change)="onCustomRange()"
+      />
+    </div>
+  </div>
+
+  <div class="summary">
+    <div class="summary__title">
+      <span class="material-icons">summarize</span>
+      Request Summary
+    </div>
+    <div class="summary__row">
+      <span class="summary__label">Time Range</span>
+      <span class="summary__value">{{ timeRangeHours }} hours</span>
+    </div>
+    <div class="summary__row">
+      <span class="summary__label">Active Subscriptions</span>
+      <span class="summary__value">{{ activeSubscriptions }} metrics</span>
+    </div>
+    <div class="summary__row">
+      <span class="summary__label">Estimated Records</span>
+      <span class="summary__value summary__value--highlight">{{ formatEstimatedRecords() }}</span>
+    </div>
+    <div class="summary__row">
+      <span class="summary__label">Estimated Pages ({{ pageSize }}/page)</span>
+      <span class="summary__value">{{ formatEstimatedPages() }}</span>
+    </div>
+    <div class="summary__row">
+      <span class="summary__label">Estimated Load Time</span>
+      <span class="summary__value">{{ formatEstimatedLoadTime() }}</span>
+    </div>
+  </div>
+
+  <div modal-footer>
+    <em-button variant="secondary" (clicked)="onClose()">Cancel</em-button>
+    <em-button variant="primary" [disabled]="!isValid" icon="download" (clicked)="onLoadData()">
+      Load Historical Data
+    </em-button>
+  </div>
+</em-modal-overlay>

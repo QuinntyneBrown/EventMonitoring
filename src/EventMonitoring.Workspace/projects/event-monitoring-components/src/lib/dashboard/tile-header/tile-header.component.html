@@ -1,0 +1,21 @@
+<div class="tile-header">
+  <span class="tile-header__title">
+    @if (icon) {
+      <span class="material-icons tile-header__title-icon">{{ icon }}</span>
+    }
+    {{ title }}
+  </span>
+  @if (actions.length > 0) {
+    <div class="tile-header__actions">
+      @for (action of actions; track action.id) {
+        <button
+          class="tile-header__action-btn"
+          [title]="action.label || action.id"
+          (click)="onActionClick(action.id)"
+        >
+          <span class="material-icons">{{ action.icon }}</span>
+        </button>
+      }
+    </div>
+  }
+</div>

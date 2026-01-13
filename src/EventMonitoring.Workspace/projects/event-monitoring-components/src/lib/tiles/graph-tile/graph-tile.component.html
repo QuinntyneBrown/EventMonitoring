@@ -1,0 +1,24 @@
+<em-tile
+  [title]="title"
+  [icon]="icon"
+  type="graph"
+  [editMode]="editMode"
+  [actions]="actions"
+  (actionClick)="onActionClick($event)"
+>
+  <div class="graph-tile__chart-container">
+    <canvas #chartCanvas></canvas>
+    @if (!chartJsLoaded && series.length > 0) {
+      <div class="graph-tile__fallback">
+        <span class="material-icons">show_chart</span>
+        <span>Chart loading...</span>
+      </div>
+    }
+    @if (series.length === 0) {
+      <div class="graph-tile__empty">
+        <span class="material-icons">insert_chart</span>
+        <span>No data available</span>
+      </div>
+    }
+  </div>
+</em-tile>

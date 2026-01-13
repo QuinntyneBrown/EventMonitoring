@@ -521,6 +521,44 @@ Then class names shall follow the BEM naming convention
 And class names shall be structured as block__element--modifier when applicable
 ```
 
+### REQ-UI-007: Design Tokens
+The frontend shall use design tokens for consistent colors, spacing, and breakpoints. Design tokens shall be implemented as CSS custom properties and TypeScript constants.
+
+**Acceptance Criteria:**
+```gherkin
+Given the component library is implemented
+When examining stylesheets
+Then CSS custom properties shall be used for design tokens
+And the following color tokens shall be defined:
+  | Token                  | Value                      |
+  | --em-color-primary     | #bb86fc                    |
+  | --em-color-secondary   | #03dac6                    |
+  | --em-color-error       | #cf6679                    |
+  | --em-color-surface     | #1f1f1f                    |
+  | --em-color-background  | #121212                    |
+  | --em-color-text-high   | rgba(255, 255, 255, 0.87)  |
+  | --em-color-text-medium | rgba(255, 255, 255, 0.6)   |
+And the following spacing tokens shall be defined:
+  | Token            | Value |
+  | --em-spacing-xs  | 4px   |
+  | --em-spacing-sm  | 8px   |
+  | --em-spacing-md  | 16px  |
+  | --em-spacing-lg  | 24px  |
+  | --em-spacing-xl  | 32px  |
+And the following border radius tokens shall be defined:
+  | Token           | Value |
+  | --em-radius-sm  | 4px   |
+  | --em-radius-md  | 8px   |
+  | --em-radius-lg  | 16px  |
+  | --em-radius-full| 50%   |
+And the following breakpoints shall be defined in TypeScript:
+  | Breakpoint | Value  |
+  | mobile     | 600px  |
+  | tablet     | 960px  |
+  | desktop    | 1280px |
+And TypeScript constants shall be exported for programmatic access to token values
+```
+
 ### REQ-UI-003: Gridstack.js for Dashboard Tiles
 The dashboard grid framework shall be Gridstack.js and shall be used for tile management.
 

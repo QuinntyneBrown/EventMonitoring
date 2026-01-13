@@ -1,0 +1,76 @@
+<em-modal-overlay
+  [isOpen]="isOpen"
+  title="Select Configuration File"
+  icon="folder_open"
+  iconColor="primary"
+  size="large"
+  (closed)="onClose()"
+>
+  <em-search-bar
+    placeholder="Search configuration files..."
+    icon="search"
+    [value]="searchQuery"
+    (searchChange)="onSearchChange($event)"
+  ></em-search-bar>
+
+  <div class="section-title">Available Configuration Files</div>
+
+  <div class="config-list">
+    @for (file of filteredFiles; track file.id) {
+      <div
+        class="config-list__item"
+        [class.config-list__item--selected]="isSelected(file)"
+        (click)="onSelectFile(file)"
+      >
+        <div class="config-list__item-checkbox">
+          @if (isSelected(file)) {
+            <span class="material-icons config-list__item-check">check</span>
+          }
+        </div>
+        <span class="material-icons config-list__item-icon">description</span>
+        <div class="config-list__item-info">
+          <div class="config-list__item-name">{{ file.name }}</div>
+          <div class="config-list__item-path">{{ file.path }}</div>
+        </div>
+        <div class="config-list__item-meta">
+          <span class="config-list__item-count">
+            <span class="material-icons">sensors</span>
+            {{ file.itemCount }} items
+          </span>
+          <span class="config-list__item-date">{{ formatDate(file.lastModified) }}</span>
+        </div>
+      </div>
+    }
+    @if (filteredFiles.length === 0) {
+      <div class="config-list__empty">
+        <span class="material-icons">search_off</span>
+        <span>No configuration files found</span>
+      </div>
+    }
+  </div>
+
+  @if (selectedFile && selectedFile.items && selectedFile.items.length > 0) {
+    <div class="preview-panel">
+      <div class="preview-panel__header">
+        <span class="preview-panel__title">
+          <span class="material-icons">preview</span>
+          Telemetry Items
+        </span>
+      </div>
+      <div class="preview-panel__content">
+        <div class="preview-panel__telemetry-list">
+          @for (item of selectedFile.items; track item) {
+            <span class="preview-panel__telemetry-item">{{ item }}</span>
+          }
+        </div>
+      </div>
+    </div>
+  }
+
+  <div modal-footer>
+    <em-button variant="secondary" (clicked)="onClose()">Cancel</em-button>
+    <em-button variant="primary" [disabled]="!selectedFile" icon="check" (clicked)="onApply()">
+      Apply Configuration
+    </em-button>
+  </div>
+</em-modal-overlay>

@@ -1,0 +1,20 @@
+.main-layout {
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+
+  &--sidenav-collapsed {
+    em-content,
+    ::ng-deep .content {
+      margin-left: 0;
+    }
+  }
+}
+
+:host ::ng-deep {
+  .content--full-width {
+    .content {
+      margin-left: 0;
+    }
+  }
+}
