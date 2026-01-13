@@ -1,0 +1,25 @@
+<em-main-layout
+  [mode]="mode"
+  [editModeActive]="editModeActive"
+  [sidenavSections]="sidenavSections"
+  [activeNavItemId]="activeNavItemId"
+  (menuClick)="onMenuClick()"
+  (editToggle)="onEditToggle()"
+  (headerActionClick)="onHeaderActionClick($event)"
+  (navItemClick)="onNavItemClick($event)"
+>
+  <div class="dashboard">
+    <div class="dashboard__header">
+      <h1 class="dashboard__title">Dashboard</h1>
+      <p class="dashboard__subtitle">Real-time space vehicle telemetry monitoring</p>
+    </div>
+
+    <div class="dashboard__content">
+      <!-- Dashboard grid will be added here -->
+      <div class="dashboard__placeholder">
+        <span class="dashboard__placeholder-icon">widgets</span>
+        <p class="dashboard__placeholder-text">Dashboard tiles will be displayed here</p>
+      </div>
+    </div>
+  </div>
+</em-main-layout>
