@@ -55,6 +55,11 @@
                     [stats]="telemetryStats"
                     [timeline]="timeline"
                     [editMode]="editModeActive"
+                    (modeChange)="onModeChange($event)"
+                    (playPause)="onTelemetryPlayPause()"
+                    (speedChange)="onTelemetrySpeedChange($event)"
+                    (timelineSeek)="onTimelineSeek($event)"
+                    (loadHistoricalData)="onLoadHistoricalData()"
                   ></em-telemetry-state-tile>
                 }
                 @case ('graph') {

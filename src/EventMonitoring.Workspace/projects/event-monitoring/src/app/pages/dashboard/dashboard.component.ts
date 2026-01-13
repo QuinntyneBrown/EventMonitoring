@@ -16,11 +16,13 @@ import {
   ConfigFileModalComponent,
   ConfigFile,
   ModalService,
+  PlaybackSpeed,
 } from 'event-monitoring-components';
 import { TilePaletteComponent } from '../../components/tile-palette/tile-palette.component';
 import { DashboardService, DashboardTile, TileType } from '../../services/dashboard.service';
 import { TelemetryService, TelemetryMessage } from '../../services/telemetry.service';
 import { ConfigurationService } from '../../services/configuration.service';
+import { HistoricalTelemetryService } from '../../services/historical-telemetry.service';
 import { Subject, takeUntil, interval, Observable } from 'rxjs';
 
 @Component({
@@ -101,7 +103,8 @@ export class DashboardComponent implements OnInit, OnDestroy {
     readonly dashboardService: DashboardService,
     private telemetryService: TelemetryService,
     private configurationService: ConfigurationService,
-    private modalService: ModalService
+    private modalService: ModalService,
+    private historicalTelemetryService: HistoricalTelemetryService
   ) {
     this.tiles$ = this.dashboardService.tiles$;
   }
@@ -261,5 +264,100 @@ export class DashboardComponent implements OnInit, OnDestroy {
 
   isConfigModalOpen(): boolean {
     return this.modalService.isOpen('config-file-modal');
+  }
+
+  // Historical telemetry methods
+  async onLoadHistoricalData(): Promise<void> {
+    // Switch to review mode
+    this.mode = 'review';
+    this.isPlaying = false;
+
+    // Open historical request modal if it exists
+    this.modalService.open('historical-request-modal');
+  }
+
+  async onHistoricalDataRequest(startTime: Date, endTime: Date): Promise<void> {
+    try {
+      // Load all historical data
+      const data = await this.historicalTelemetryService.loadAllHistoricalData({
+        startTime,
+        endTime,
+      });
+
+      // Update timeline
+      this.timeline = {
+        startTime: startTime.toISOString(),
+        endTime: endTime.toISOString(),
+        currentTime: startTime.toISOString(),
+        progress: 0,
+      };
+
+      // Update stats
+      this.telemetryStats = {
+        ...this.telemetryStats,
+        totalRecords: data.length,
+      };
+
+      // Start playback
+      this.historicalTelemetryService.startPlayback(startTime, endTime, 1);
+
+      // Subscribe to playback state
+      this.historicalTelemetryService.playbackState$
+        .pipe(takeUntil(this.destroy$))
+        .subscribe((state) => {
+          this.timeline = {
+            ...this.timeline,
+            currentTime: state.currentTime.toISOString(),
+            progress: state.progress,
+          };
+          this.isPlaying = state.isPlaying;
+
+          // Update tiles with telemetry at current time
+          const currentTelemetry = this.historicalTelemetryService.getTelemetryAtTime(
+            state.currentTime
+          );
+          currentTelemetry.forEach((message) => this.updateTileData(message));
+        });
+    } catch (error) {
+      console.error('Error loading historical data:', error);
+    }
+  }
+
+  onTelemetryPlayPause(): void {
+    if (this.mode === 'live') {
+      this.isPlaying = !this.isPlaying;
+    } else {
+      // Review mode
+      if (this.isPlaying) {
+        this.historicalTelemetryService.pausePlayback();
+      } else {
+        this.historicalTelemetryService.resumePlayback();
+      }
+    }
+  }
+
+  onTelemetrySpeedChange(speed: PlaybackSpeed): void {
+    this.historicalTelemetryService.setSpeed(speed);
+  }
+
+  onTimelineSeek(progress: number): void {
+    this.historicalTelemetryService.seekTo(progress);
+  }
+
+  onModeChange(newMode: 'live' | 'review'): void {
+    if (newMode === 'live' && this.mode === 'review') {
+      // Switch back to live mode
+      this.historicalTelemetryService.stopPlayback();
+      this.mode = 'live';
+      this.isPlaying = true;
+      
+      // Reset timeline
+      this.timeline = {
+        startTime: new Date(Date.now() - 3600000).toISOString(),
+        endTime: 'Now',
+        currentTime: new Date().toISOString(),
+        progress: 100,
+      };
+    }
   }
 }
