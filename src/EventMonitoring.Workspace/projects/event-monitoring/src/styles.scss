@@ -44,7 +44,11 @@ body {
   -moz-osx-font-smoothing: grayscale;
 }
 
-/* Material Icons */
+/* Material Icons 
+ * Note: Material Icons font should be loaded via CDN or installed as a package.
+ * The component library already includes Material Icons support.
+ * These styles provide fallback configuration for icon rendering.
+ */
 .material-icons {
   font-family: 'Material Icons';
   font-weight: normal;

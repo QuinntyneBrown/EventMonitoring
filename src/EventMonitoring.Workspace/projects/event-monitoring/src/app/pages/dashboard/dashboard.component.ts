@@ -44,20 +44,18 @@ export class DashboardComponent {
   ];
 
   onMenuClick(): void {
-    console.log('Menu clicked');
+    // Menu toggle functionality can be implemented here
   }
 
   onEditToggle(): void {
     this.editModeActive = !this.editModeActive;
-    console.log('Edit mode:', this.editModeActive);
   }
 
   onHeaderActionClick(actionId: string): void {
-    console.log('Header action:', actionId);
+    // Handle header actions (notifications, settings, account)
   }
 
   onNavItemClick(item: SidenavItem): void {
     this.activeNavItemId = item.id;
-    console.log('Nav item clicked:', item);
   }
 }
