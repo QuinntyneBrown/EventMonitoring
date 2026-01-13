@@ -1,7 +1,6 @@
 import { Component, Input, Output, EventEmitter, ChangeDetectionStrategy } from '@angular/core';
 import { CommonModule } from '@angular/common';
-
-export type ButtonVariant = 'primary' | 'secondary' | 'icon';
+import type { ButtonVariant } from '../../tokens/design-tokens';
 
 @Component({
   selector: 'em-button',

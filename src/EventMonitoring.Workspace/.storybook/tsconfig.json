@@ -4,6 +4,9 @@
     "emitDecoratorMetadata": true,
     "types": ["node"]
   },
-  "include": ["../projects/event-monitoring-components/src/**/*"],
+  "include": [
+    "../projects/event-monitoring-components/src/**/*",
+    "./**/*"
+  ],
   "exclude": ["../projects/event-monitoring-components/src/**/*.spec.ts"]
 }

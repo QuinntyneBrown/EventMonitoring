@@ -9,7 +9,7 @@ import { CommonModule } from '@angular/common';
 import { TileComponent } from '../../dashboard/tile/tile.component';
 import { InfoBoxComponent } from '../../ui/info-box/info-box.component';
 import { TileAction } from '../../dashboard/tile-header/tile-header.component';
-import { TelemetryMode } from '../../tokens/design-tokens';
+import type { TelemetryMode } from '../../tokens/design-tokens';
 
 export interface TelemetryStats {
   updateRate: string;

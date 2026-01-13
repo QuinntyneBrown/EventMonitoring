@@ -9,7 +9,7 @@ import { CommonModule } from '@angular/common';
 import { HeaderComponent, HeaderAction } from '../header/header.component';
 import { SidenavComponent, SidenavSection, SidenavItem } from '../sidenav/sidenav.component';
 import { ContentComponent } from '../content/content.component';
-import { TelemetryMode } from '../../tokens/design-tokens';
+import type { TelemetryMode } from '../../tokens/design-tokens';
 
 @Component({
   selector: 'em-main-layout',

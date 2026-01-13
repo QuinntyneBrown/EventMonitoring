@@ -8,7 +8,7 @@ import {
 import { CommonModule } from '@angular/common';
 import { ModeIndicatorComponent } from '../../ui/mode-indicator/mode-indicator.component';
 import { ButtonComponent } from '../../ui/button/button.component';
-import { TelemetryMode } from '../../tokens/design-tokens';
+import type { TelemetryMode } from '../../tokens/design-tokens';
 
 export interface HeaderAction {
   id: string;
