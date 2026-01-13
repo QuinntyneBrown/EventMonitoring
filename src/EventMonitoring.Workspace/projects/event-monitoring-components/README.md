@@ -42,11 +42,39 @@ Once the project is built, you can publish your library by following these steps
 
 ## Running unit tests
 
-To execute unit tests with the [Karma](https://karma-runner.github.io) test runner, use the following command:
+To execute unit tests with Vitest, use the following command:
 
 ```bash
-ng test
+npm run test:lib
 ```
+
+## Storybook
+
+This library includes [Storybook](https://storybook.js.org/) for component development and documentation. All components have corresponding `.stories.ts` files that demonstrate their usage.
+
+### Running Storybook
+
+To start the Storybook development server from the workspace root, run:
+
+```bash
+npm run storybook
+```
+
+The Storybook interface will be available at `http://localhost:6006/`, where you can:
+- Browse all components in isolation
+- Test different component states and props
+- View component documentation
+- Interact with components using controls
+
+### Building Storybook
+
+To build a static version of Storybook for deployment, run:
+
+```bash
+npm run build-storybook
+```
+
+The built Storybook will be output to the `dist/storybook/` directory.
 
 ## Running end-to-end tests
 

@@ -7,7 +7,7 @@ import {
 } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { TileHeaderComponent, TileAction } from '../tile-header/tile-header.component';
-import { TileType } from '../../tokens/design-tokens';
+import type { TileType } from '../../tokens/design-tokens';
 
 @Component({
   selector: 'em-tile',

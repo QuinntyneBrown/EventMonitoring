@@ -1,7 +1,6 @@
 import { Component, Input, ChangeDetectionStrategy } from '@angular/core';
 import { CommonModule } from '@angular/common';
-
-export type StatusType = 'normal' | 'warning' | 'critical';
+import type { StatusType } from '../../tokens/design-tokens';
 
 @Component({
   selector: 'em-status-badge',

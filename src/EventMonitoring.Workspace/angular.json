@@ -29,6 +29,24 @@
           "options": {
             "tsConfig": "projects/event-monitoring-components/tsconfig.spec.json"
           }
+        },
+        "storybook": {
+          "builder": "@storybook/angular:start-storybook",
+          "options": {
+            "configDir": ".storybook",
+            "browserTarget": "event-monitoring-components:build",
+            "compodoc": false,
+            "port": 6006
+          }
+        },
+        "build-storybook": {
+          "builder": "@storybook/angular:build-storybook",
+          "options": {
+            "configDir": ".storybook",
+            "browserTarget": "event-monitoring-components:build",
+            "compodoc": false,
+            "outputDir": "dist/storybook"
+          }
         }
       }
     }

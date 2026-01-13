@@ -1,7 +1,6 @@
 import { Component, Input, ChangeDetectionStrategy } from '@angular/core';
 import { CommonModule } from '@angular/common';
-
-export type TelemetryMode = 'live' | 'review';
+import type { TelemetryMode } from '../../tokens/design-tokens';
 
 @Component({
   selector: 'em-mode-indicator',

@@ -165,7 +165,7 @@ export type StatusType = 'normal' | 'warning' | 'critical';
 export type TelemetryMode = 'live' | 'review';
 export type DashboardMode = 'view' | 'edit';
 export type ButtonVariant = 'primary' | 'secondary' | 'icon';
-export type TileType = 'telemetry-state' | 'graph' | 'tabular';
+export type TileType = 'default' | 'telemetry-state' | 'graph' | 'tabular';
 
 // =============================================================================
 // Chart.js Color Configuration (for Graph Tile)
